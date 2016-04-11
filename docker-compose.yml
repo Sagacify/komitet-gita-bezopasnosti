@@ -1,0 +1,7 @@
+py:
+  build: .
+  ports:
+    - "17100:5000"
+  volumes:
+    - ./komitet_git_bezopasnosti:/var/www/komitet_git_bezopasnosti
+    - ./requirements.txt:/var/www/requirements.txt

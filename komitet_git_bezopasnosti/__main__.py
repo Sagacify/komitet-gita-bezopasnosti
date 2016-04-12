@@ -28,7 +28,7 @@ def check_pr(commits_url, comments_url, status_url):
 
     log.debug(all_errors)
     github.upsert_comment(comments_url, messages)
-    github.update_status(status_url, errors)
+    github.update_status(status_url, sum(len(err[1]) for err in errors))
 
 
 def github_pr():

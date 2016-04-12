@@ -70,7 +70,7 @@ def update_status(url, errors=None):
                       json={"state": "pending",
                             "context": STATUS_CONTEXT,
                             "description": "KGB is reviewing your commits."})
-    elif len(errors) == 0:
+    elif errors == 0:
         requests.post(url,
                       params={"access_token": GH_TOKEN},
                       json={"state": "success",
@@ -82,4 +82,4 @@ def update_status(url, errors=None):
                       json={"state": "error",
                             "context": STATUS_CONTEXT,
                             "description":
-                            "Fix the {} errors found!".format(len(errors))})
+                            "Fix the {} errors found!".format(errors)})

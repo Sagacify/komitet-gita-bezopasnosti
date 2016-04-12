@@ -16,6 +16,7 @@ _DEFAULT_TYPES = ",".join([
     "perf",
     "refactor",
     "revert",
+    "style",
     "test"])
 TYPES = (env.get("AUTHORIZED_TYPES") or _DEFAULT_TYPES).split(",")
 

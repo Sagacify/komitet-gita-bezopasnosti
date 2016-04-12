@@ -30,7 +30,8 @@ from . import status_rules
 
 def _get_rules(module):
     """Get all functions from a module."""
-    return [o[1] for o in getmembers(module, isfunction)]
+    return [tup[1] for tup in getmembers(module, isfunction)
+            if tup[0][0] != "_"]
 
 _line_rules = _get_rules(line_rules)
 _raw_rules = _get_rules(raw_rules)

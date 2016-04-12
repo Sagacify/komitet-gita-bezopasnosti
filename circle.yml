@@ -19,7 +19,7 @@ deployment:
   hub:
     branch: master
     commands:
-      - echo "{\"https://index.docker.io/v1/\":{\"auth\":\"${HUB_AUTH}\",\"email\":\"${HUB_EMAIL}\"}}"
-      - docker tag $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:v$CIRCLE_BUILD_NUM
-      - docker tag $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:v$CIRCLE_BUILD_NUM sagacify/kosmioapi:$latest
-      - docker push $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+      - echo "{\"https://index.docker.io/v1/\":{\"auth\":\"${HUB_AUTH}\",\"email\":\"${HUB_EMAIL}\"}}" > ~/.dockercfg
+      - docker tag komitetgitabezopasnosti_py sagacify/$CIRCLE_PROJECT_REPONAME:v$CIRCLE_BUILD_NUM
+      - docker tag sagacify/$CIRCLE_PROJECT_REPONAME:v$CIRCLE_BUILD_NUM sagacify/$CIRCLE_PROJECT_REPONAME:$latest
+      - docker push sagacify/$CIRCLE_PROJECT_REPONAME

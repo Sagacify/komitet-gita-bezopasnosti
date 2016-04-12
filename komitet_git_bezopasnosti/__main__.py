@@ -2,7 +2,7 @@ import logging
 import sys
 
 from flask import Flask
-from flask import request
+import flask
 
 from . import GH_TOKEN
 from . import HIDDEN
@@ -32,7 +32,7 @@ def check_pr(commits_url, comments_url, status_url):
 
 
 def github_pr():
-    body = request.json
+    body = flask.request.json
     if body is None:
         return "", 500
     keys = body.keys()

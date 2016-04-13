@@ -1,9 +1,9 @@
-Komitet Git'a bezopasnosti
+Komitet Git'a Bezopasnosti
 ==========================
 .. image:: https://circleci.com/gh/Sagacify/komitet-gita-bezopasnosti.svg?style=svg
     :target: https://circleci.com/gh/Sagacify/komitet-gita-bezopasnosti
 
-Komitet Git'a bezopasnosti (kgb) or Git security committee, is a commit 
+Komitet Git'a Bezopasnosti (kgb) or Git security committee, is a commit 
 message style enforcer.
 It will listen to pull-request(pr) events from github, analyse the
 commit messages in the pr, and if there are any violations, 

@@ -8,14 +8,14 @@ def check_second_line(commit_lines):
     >>> check_second_line(split_lines("first line\n\nbody"))
 
     >>> check_second_line(split_lines("first line\nbody"))
-    'Seperate status and body with an empty line.'
+    'Separate status and body with an empty line.'
 
     >>> check_second_line(split_lines("first line\n"))
     'Trim new line at the end of single line commit.'
     """
     if len(commit_lines) > 1:
         if len(commit_lines[1]) > 0:
-            return "Seperate status and body with an empty line."
+            return "Separate status and body with an empty line."
         if len(commit_lines) == 2:
             return "Trim new line at the end of single line commit."
 

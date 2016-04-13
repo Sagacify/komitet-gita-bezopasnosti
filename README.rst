@@ -37,4 +37,5 @@ failing examples
 ----------------
 Tabs in commit message.
 Status line is over 50 characters.
-Status line doesn't respect conventional changelog
+Status line diverges from conventional changelog
+Second line is not empty

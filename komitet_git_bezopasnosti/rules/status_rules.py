@@ -1,8 +1,8 @@
 import re
 
-from .. import MAX_STATUS_LENGTH
-from .. import STATUS_R
-from .. import TYPES
+from ..config import MAX_STATUS_LENGTH
+from ..config import STATUS_R
+from ..config import TYPES
 
 start_with = re.compile("^(" + "|".join(TYPES) + ")")
 spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")

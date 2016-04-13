@@ -1,4 +1,4 @@
-from .. import MAX_LINE_LENGTH
+from ..config import MAX_LINE_LENGTH
 
 
 def check_second_line(commit_lines):

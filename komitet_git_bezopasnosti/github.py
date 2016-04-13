@@ -3,9 +3,9 @@ import logging
 
 import requests
 
-from . import HIDDEN
-from . import GH_TOKEN
-from . import STATUS_CONTEXT
+from .config import HIDDEN
+from .config import GH_TOKEN
+from .config import STATUS_CONTEXT
 
 log = logging.getLogger(__name__)
 

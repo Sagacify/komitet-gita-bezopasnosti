@@ -42,8 +42,8 @@ def check_status_formatting(status_line):
         if STATUS_R.match(status_line) is None:
             if start_with.match(status_line) is None:
                 errors.append(
-                    "Status must start with one of the followings:\n* " +
-                    "* ".join(TYPES))
+                    "Status must start with one of the followings:\n*" +
+                    ", ".join(TYPES) + "*")
             if spaces.match(status_line) is not None:
                 errors.append(
                     "Non word characters are not allowed in type and scope.")

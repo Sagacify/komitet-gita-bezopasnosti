@@ -67,23 +67,9 @@ def create_comment(url, body):
                   json={"body": body})
 
 
-def update_status(url, errors=None):
-    if errors is None:
-        requests.post(url,
-                      params={"access_token": GH_TOKEN},
-                      json={"state": "pending",
-                            "context": STATUS_CONTEXT,
-                            "description": "KGB is reviewing your commits."})
-    elif errors == 0:
-        requests.post(url,
-                      params={"access_token": GH_TOKEN},
-                      json={"state": "success",
-                            "context": STATUS_CONTEXT,
-                            "description": "We are proud of you!"})
-    else:
-        requests.post(url,
-                      params={"access_token": GH_TOKEN},
-                      json={"state": "error",
-                            "context": STATUS_CONTEXT,
-                            "description":
-                            "Fix the {} errors found!".format(errors)})
+def update_status(url, message="The KGB is reviewing your commits."):
+    requests.post(url,
+                  params={"access_token": GH_TOKEN},
+                  json={"state": "error",
+                        "context": STATUS_CONTEXT,
+                        "description": message})

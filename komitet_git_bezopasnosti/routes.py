@@ -21,7 +21,13 @@ def check_pr(commits_url, comments_url, status_url):
 
     log.debug(all_errors)
     github.upsert_comment(comments_url, messages)
-    github.update_status(status_url, sum(len(err[1]) for err in errors))
+    if all_errors == 0:
+        github.update_status(status_url, "We are proud of you!")
+    elif all_errors == 1:
+        github.update_status(status_url, "Fix the error!")
+    else:
+        github.update_status(status_url,
+                             "Fix the {} errors!".format(all_errors))
 
 
 def github_pr():

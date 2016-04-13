@@ -36,6 +36,9 @@ def github_pr():
     if body is None:
         return "", 500
     keys = body.keys()
+    if "zen" in keys:
+        # This is the initial event sent to test the hook.
+        return "", 204
     if "action" not in keys or "pull_request" not in keys:
         log.error({"error": "not_a_pull_request", "body": body})
         return "", 500

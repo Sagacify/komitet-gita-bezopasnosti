@@ -31,3 +31,8 @@ examples
 
 .. _failing: https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/4
 .. _passing: https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/6
+
+
+failing examples
+----------------
+Tabs in commit message.

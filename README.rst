@@ -1,5 +1,7 @@
 Komitet Git'a bezopasnosti
 ==========================
+.. image:: https://circleci.com/gh/Sagacify/komitet-gita-bezopasnosti.svg?style=svg
+    :target: https://circleci.com/gh/Sagacify/komitet-gita-bezopasnosti
 
 Komitet Git'a bezopasnosti (kgb) or Git security committee, is a commit 
 message style enforcer.

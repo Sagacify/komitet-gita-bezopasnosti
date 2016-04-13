@@ -39,3 +39,4 @@ Tabs in commit message.
 Status line is over 50 characters.
 Status line diverges from conventional changelog
 Second line is not empty
+Body line is over 72 characters long.

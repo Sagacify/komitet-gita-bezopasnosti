@@ -20,3 +20,12 @@ link to port 5000.
 
 The github token is needed to write comments, set the pr status as
 well as access any private repo.
+
+
+examples
+--------
+* failing_
+* passing_
+
+.. _failing: https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/4
+.. _passing: https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/6

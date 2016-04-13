@@ -1,8 +1,8 @@
 import re
 
-from .. import MAX_STATUS_LENGTH
-from .. import STATUS_R
-from .. import TYPES
+from ..config import MAX_STATUS_LENGTH
+from ..config import STATUS_R
+from ..config import TYPES
 
 start_with = re.compile("^(" + "|".join(TYPES) + ")")
 spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")
@@ -41,8 +41,9 @@ def check_status_formatting(status_line):
     if not _is_merge(status_line):
         if STATUS_R.match(status_line) is None:
             if start_with.match(status_line) is None:
-                errors.append("Status must start with:\n" +
-                              ", ".join(TYPES))
+                errors.append(
+                    "Status must start with one of the followings:\n* " +
+                    "* ".join(TYPES))
             if spaces.match(status_line) is not None:
                 errors.append(
                     "Non word characters are not allowed in type and scope.")

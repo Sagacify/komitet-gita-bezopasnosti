@@ -3,9 +3,9 @@ import logging
 
 import requests
 
-from . import HIDDEN
-from . import GH_TOKEN
-from . import STATUS_CONTEXT
+from .config import HIDDEN
+from .config import GH_TOKEN
+from .config import STATUS_CONTEXT
 
 log = logging.getLogger(__name__)
 
@@ -39,16 +39,20 @@ def delete_comment(comment):
 def upsert_comment(url, messages):
     comments = get_comments(url)
     message = HIDDEN + "\n\n".join(messages)
-    if len(comments) > 1:
-        log.error({"error": "not_supposed_to_happen",
-                   "comments": comments})
+
+    if len(messages) == 0:
         for comment in comments:
             delete_comment(comment)
-    elif len(comments) == 1:
-        if comments[0]["body"] != message:
-            update_comment(comments[0], message)
     else:
-        create_comment(url, message)
+        if len(comments) > 1:
+            for comment in comments:
+                delete_comment(comment)
+            create_comment(url, message)
+        if len(comments) == 1:
+            if comments[0]["body"] != message:
+                update_comment(comments[0], message)
+        else:
+            create_comment(url, message)
 
 
 def update_comment(comments, body):

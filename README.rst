@@ -36,3 +36,4 @@ examples
 failing examples
 ----------------
 Tabs in commit message.
+Status line is over 50 characters.

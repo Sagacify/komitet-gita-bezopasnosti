@@ -8,6 +8,8 @@ It comes in two parts, a web hook for github (lubyanka) and a local git commit-m
 In an ideal world, a local hook should be enough, in practice, mistakes happen.
 The KGitB is here to ensure no mistakes are ever allowed through to infect your master branch.
 
+AND IT WORKS REALLY WELL. JUST LOOK AT THIS PASSING COMMIT.
+
 examples
 --------
 * [failing](https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/4)

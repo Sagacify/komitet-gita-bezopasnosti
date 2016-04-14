@@ -14,12 +14,3 @@ dependencies:
 test:
   override:
     - docker-compose run py py.test --doctest-modules komitet_git_bezopasnosti
-
-deployment:
-  hub:
-    branch: master
-    commands:
-      - echo "{\"https://index.docker.io/v1/\":{\"auth\":\"${HUB_AUTH}\",\"email\":\"${HUB_EMAIL}\"}}" > ~/.dockercfg
-      - docker tag komitetgitabezopasnosti_py sagacify/$CIRCLE_PROJECT_REPONAME:v$CIRCLE_BUILD_NUM
-      - docker tag sagacify/$CIRCLE_PROJECT_REPONAME:v$CIRCLE_BUILD_NUM sagacify/$CIRCLE_PROJECT_REPONAME:$latest
-      - docker push sagacify/$CIRCLE_PROJECT_REPONAME

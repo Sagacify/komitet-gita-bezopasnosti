@@ -1,7 +1,7 @@
 Komitet Git'a Bezopasnosti
 ==========================
-.. image:: https://img.shields.io/circleci/project/Sagacify/komitet-gita-bezopasnosti/master.svg?maxAge=2592000   :target: https://circleci.com/gh/Sagacify/komitet-gita-bezopasnosti/tree/master
-.. image:: https://img.shields.io/docker/stars/sagacify/kgb.svg?maxAge=2592000   :target: https://hub.docker.com/r/sagacify/kgb/
+[![CircleCI branch](https://img.shields.io/circleci/project/Sagacify/komitet-gita-bezopasnosti/master.svg?maxAge=2592000)](https://circleci.com/gh/Sagacify/komitet-gita-bezopasnosti/tree/master)
+[![Docker Stars](https://img.shields.io/docker/stars/sagacify/kgb.svg?maxAge=2592000)](https://hub.docker.com/r/sagacify/kgb/)
 
 Komitet Git'a Bezopasnosti (kgb) or Git security committee, is a commit 
 message style enforcer.
@@ -13,9 +13,9 @@ If there are no violations it will set the status to success.
 
 If you want to run it you can use:
 
-.. code-block:: bash
-
-    $ GH_TOKEN=`YOUR GITHUB TOKEN HERE` python -m komitet_git_bezopasnosti
+``` bash
+ $ GH_TOKEN=`YOUR GITHUB TOKEN HERE` python -m komitet_git_bezopasnosti
+```
 
 If you use docker remember to set the GH_TOKEN environment variable and
 link to port 5000.
@@ -26,8 +26,5 @@ well as access any private repo.
 
 examples
 --------
-* failing_
-* passing_
-
-.. _failing: https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/4
-.. _passing: https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/6
+* [failing](https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/4)
+* [passing](https://github.com/Sagacify/komitet-gita-bezopasnosti/pull/6)

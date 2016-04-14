@@ -67,9 +67,9 @@ def create_comment(url, body):
                   json={"body": body})
 
 
-def update_status(url, message="The KGB is reviewing your commits."):
+def update_status(url, state, message):
     requests.post(url,
                   params={"access_token": GH_TOKEN},
-                  json={"state": "error",
+                  json={"state": state,
                         "context": STATUS_CONTEXT,
                         "description": message})

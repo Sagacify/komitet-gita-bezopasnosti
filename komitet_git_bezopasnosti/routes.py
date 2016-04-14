@@ -7,7 +7,8 @@ log = logging.getLogger(__name__)
 
 
 def check_pr(commits_url, comments_url, status_url):
-    github.update_status(status_url)
+    github.update_status(status_url, "pending",
+                         "The KGB is reviewing your commits.")
     all_errors = 0
     messages = []
     for commit in github.get_commits(commits_url):
@@ -22,11 +23,11 @@ def check_pr(commits_url, comments_url, status_url):
     log.debug(all_errors)
     github.upsert_comment(comments_url, messages)
     if all_errors == 0:
-        github.update_status(status_url, "We are proud of you!")
+        github.update_status(status_url, "success", "We are proud of you!")
     elif all_errors == 1:
-        github.update_status(status_url, "Fix the error!")
+        github.update_status(status_url, "error", "Fix the error!")
     else:
-        github.update_status(status_url,
+        github.update_status(status_url, "error",
                              "Fix the {} errors!".format(all_errors))
 
 

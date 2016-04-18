@@ -4,7 +4,10 @@ from ..config import MAX_STATUS_LENGTH
 from ..config import STATUS_R
 from ..config import TYPES
 
-start_with = re.compile("^(" + "|".join(TYPES) + ")")
+
+start_with = re.compile("^(" + "|".join(TYPES) + ")\(")
+
+
 spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")
 
 
@@ -28,6 +31,16 @@ def check_status_length(status_line):
 def check_status_formatting(status_line):
     r"""Check status formatting.
     >>> check_status_formatting("fix(this): This is good")
+
+    >>> print(check_status_formatting("fixing(this): This is not good"))
+    Status must start with one of the followings:
+    *doc, feat, fix, perf, refactor, revert, style, test*
+    Conform status to `<type>(<scope>): <subject>` pattern
+
+    >>> print(check_status_formatting("testing(this): This is not good"))
+    Status must start with one of the followings:
+    *doc, feat, fix, perf, refactor, revert, style, test*
+    Conform status to `<type>(<scope>): <subject>` pattern
 
     >>> print(check_status_formatting("fix(th)is): This is not good"))
     Non word characters are not allowed in type and scope.

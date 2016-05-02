@@ -2,7 +2,7 @@ from os import environ as env
 
 # Identifier used to recognize auto-generated comments
 HIDDEN = "<KGB>"
-STATUS_CONTEXT = "Комитет Git'a безопасности"
+STATUS_CONTEXT = "Комитет Git'a Безопасности"
 
 MAX_STATUS_LENGTH = int(env.get("MAX_STATUS_LENGTH") or 50)
 MAX_LINE_LENGTH = int(env.get("MAX_LINE_LENGTH") or 72)

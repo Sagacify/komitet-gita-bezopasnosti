@@ -1,14 +1,14 @@
 import logging
 import sys
 
-from .config import GH_TOKEN
+from .config import GH_TOKEN, HOST, PORT
 from . import app
 
 log = logging.getLogger(__name__)
 
 
 def main():
-    app.run(host='0.0.0.0')
+    app.run(host=HOST, port=PORT)
 
 
 if __name__ == '__main__':

@@ -1,14 +1,13 @@
 import re
 
 from ..config import MAX_STATUS_LENGTH
-from ..config import STATUS_R
 from ..config import TYPES
 
-
-start_with = re.compile("^(" + "|".join(TYPES) + ")\(")
-
+status_pattern = re.compile("""^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(.*)$""")
 
 spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")
+
+_type_string = ", ".join(sorted(TYPES))
 
 
 def _is_merge(status_line):
@@ -33,33 +32,45 @@ def check_status_formatting(status_line):
     >>> check_status_formatting("fix(this): This is good")
 
     >>> print(check_status_formatting("fixing(this): This is not good"))
-    Status must start with one of the followings:
+    Status must start with one of the following types:
     *doc, feat, fix, perf, refactor, revert, style, test*
-    Conform status to `<type>(<scope>): <subject>` pattern
 
     >>> print(check_status_formatting("testing(this): This is not good"))
-    Status must start with one of the followings:
+    Status must start with one of the following types:
     *doc, feat, fix, perf, refactor, revert, style, test*
-    Conform status to `<type>(<scope>): <subject>` pattern
 
     >>> print(check_status_formatting("fix(th)is): This is not good"))
-    Non word characters are not allowed in type and scope.
     Conform status to `<type>(<scope>): <subject>` pattern
+    type and scope cannot contain spaces or parenthesis
 
     >>> print(check_status_formatting("fix(th is): This is not good"))
-    Non word characters are not allowed in type and scope.
     Conform status to `<type>(<scope>): <subject>` pattern
+    type and scope cannot contain spaces or parenthesis
+
+    >>> print(check_status_formatting("fix (this) : This is not good"))
+    Remove space between type and scope.
+    Remove space between scope and colon.
+
+    >>> print(check_status_formatting("fix(this):This is not good"))
+    Add space after colon.
     """
+    if _is_merge(status_line):
+        return None
+    match = status_pattern.match(status_line)
+    if (match is None):
+        return ("Conform status to `<type>(<scope>): <subject>` pattern\n" +
+                "type and scope cannot contain spaces or parenthesis")
     errors = []
-    if not _is_merge(status_line):
-        if STATUS_R.match(status_line) is None:
-            if start_with.match(status_line) is None:
-                errors.append(
-                    "Status must start with one of the followings:\n*" +
-                    ", ".join(TYPES) + "*")
-            if spaces.match(status_line) is not None:
-                errors.append(
-                    "Non word characters are not allowed in type and scope.")
-            errors.append(
-                "Conform status to `<type>(<scope>): <subject>` pattern")
-            return "\n".join(errors)
+    if match.group(1) not in TYPES:
+        errors.append("Status must start with one of the following types:\n" +
+                      "*%s*" % _type_string)
+    if len(match.group(2)) > 0:
+        errors.append("Remove space between type and scope.")
+    if len(match.group(4)) > 0:
+        errors.append("Remove space between scope and colon.")
+    if not match.group(5).startswith(" "):
+        errors.append("Add space after colon.")
+    if len(errors) == 0:
+        return None
+    else:
+        return "\n".join(errors)

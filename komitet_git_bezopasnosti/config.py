@@ -1,5 +1,4 @@
 from os import environ as env
-import re
 
 # Identifier used to recognize auto-generated comments
 HIDDEN = "<KGB>"
@@ -17,10 +16,7 @@ _DEFAULT_TYPES = ",".join([
     "revert",
     "style",
     "test"])
-TYPES = (env.get("AUTHORIZED_TYPES") or _DEFAULT_TYPES).split(",")
-
-STATUS_R = re.compile(
-    "(" + "|".join(TYPES) + ")" + "\(" + "[^)\s]+" + "\):" + ".*")
+TYPES = frozenset((env.get("AUTHORIZED_TYPES") or _DEFAULT_TYPES).split(","))
 
 GH_TOKEN = env.get("GH_TOKEN")
 

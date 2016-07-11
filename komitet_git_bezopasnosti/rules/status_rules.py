@@ -1,12 +1,13 @@
 import re
 
 from ..config import MAX_STATUS_LENGTH
-from ..config import STATUS_R
 from ..config import TYPES
 
 status_pattern = re.compile("""^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(.*)$""")
 
 spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")
+
+_type_string = ", ".join(sorted(TYPES))
 
 
 def _is_merge(status_line):
@@ -57,11 +58,12 @@ def check_status_formatting(status_line):
         return None
     match = status_pattern.match(status_line)
     if (match is None):
-        return ("Conform status to `<type>(<scope>): <subject>` pattern\n" + 
+        return ("Conform status to `<type>(<scope>): <subject>` pattern\n" +
                 "type and scope cannot contain spaces or parenthesis")
     errors = []
     if match.group(1) not in TYPES:
-        errors.append("Status must start with one of the following types:\n*%s*" % ", ".join(TYPES))
+        errors.append("Status must start with one of the following types:\n" +
+                      "*%s*" % _type_string)
     if len(match.group(2)) > 0:
         errors.append("Remove space between type and scope.")
     if len(match.group(4)) > 0:

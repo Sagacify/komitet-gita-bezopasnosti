@@ -23,3 +23,5 @@ GH_TOKEN = env.get("GH_TOKEN")
 
 HOST = env.get("KGB_HOST") or "0.0.0.0"
 PORT = env.get("KGB_PORT") or 5000
+
+INFO = "https://github.com/sagacify/komitet-gita-bezopasnosti"

@@ -15,7 +15,8 @@ _DEFAULT_TYPES = ",".join([
     "refactor",
     "revert",
     "style",
-    "test"])
+    "test",
+    "version"])
 TYPES = frozenset((env.get("AUTHORIZED_TYPES") or _DEFAULT_TYPES).split(","))
 
 GH_TOKEN = env.get("GH_TOKEN")

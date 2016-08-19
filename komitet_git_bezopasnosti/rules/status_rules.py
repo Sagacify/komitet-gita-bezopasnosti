@@ -52,8 +52,10 @@ def check_status_formatting(status_line):
     Remove space between type and scope.
     Remove space between scope and colon.
 
-    >>> print(check_status_formatting("fix(this):This is not good"))
+    >>> print(check_status_formatting("fix(this):N  "))
     Add space after colon.
+    Make subject at least three character long.
+    Strip trailing whitespaces from status line.
     """
     if _is_merge(status_line):
         return None
@@ -71,6 +73,12 @@ def check_status_formatting(status_line):
         errors.append("Remove space between scope and colon.")
     if match.group(5) != " ":
         errors.append("Add space after colon.")
+    if not match.group(6)[0].isupper():
+        errors.append("Uppercase the first character of the subject.")
+    if len(match.group(6).strip()) < 3:
+        errors.append("Make subject at least three character long.")
+    if len(match.group(7)) > 0:
+        errors.append("Strip trailing whitespaces from status line.")
     if len(errors) == 0:
         return None
     else:

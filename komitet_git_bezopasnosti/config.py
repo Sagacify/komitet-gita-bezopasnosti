@@ -15,10 +15,13 @@ _DEFAULT_TYPES = ",".join([
     "refactor",
     "revert",
     "style",
-    "test"])
+    "test",
+    "version"])
 TYPES = frozenset((env.get("AUTHORIZED_TYPES") or _DEFAULT_TYPES).split(","))
 
 GH_TOKEN = env.get("GH_TOKEN")
 
 HOST = env.get("KGB_HOST") or "0.0.0.0"
 PORT = env.get("KGB_PORT") or 5000
+
+INFO = "https://github.com/sagacify/komitet-gita-bezopasnosti"

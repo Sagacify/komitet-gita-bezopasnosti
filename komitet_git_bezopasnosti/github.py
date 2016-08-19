@@ -3,8 +3,9 @@ import logging
 
 import requests
 
-from .config import HIDDEN
 from .config import GH_TOKEN
+from .config import HIDDEN
+from .config import INFO
 from .config import STATUS_CONTEXT
 
 log = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ def delete_comment(comment):
 
 def upsert_comment(url, messages):
     comments = get_comments(url)
-    message = HIDDEN + "\n\n".join(messages)
+    message = HIDDEN + "\n\n".join(messages) + "More info [here](%s)" % INFO
 
     if len(messages) == 0:
         for comment in comments:

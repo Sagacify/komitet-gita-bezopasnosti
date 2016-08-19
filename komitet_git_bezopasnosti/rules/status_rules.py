@@ -3,7 +3,8 @@ import re
 from ..config import MAX_STATUS_LENGTH
 from ..config import TYPES
 
-status_pattern = re.compile("""^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(.*)$""")
+status_pattern = re.compile(
+    """^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\w)(\s*)$""")
 
 spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")
 
@@ -33,11 +34,11 @@ def check_status_formatting(status_line):
 
     >>> print(check_status_formatting("fixing(this): This is not good"))
     Status must start with one of the following types:
-    *doc, feat, fix, perf, refactor, revert, style, test*
+    *doc, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting("testing(this): This is not good"))
     Status must start with one of the following types:
-    *doc, feat, fix, perf, refactor, revert, style, test*
+    *doc, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting("fix(th)is): This is not good"))
     Conform status to `<type>(<scope>): <subject>` pattern
@@ -51,8 +52,10 @@ def check_status_formatting(status_line):
     Remove space between type and scope.
     Remove space between scope and colon.
 
-    >>> print(check_status_formatting("fix(this):This is not good"))
+    >>> print(check_status_formatting("fix(this):N  "))
     Add space after colon.
+    Make subject at least three character long.
+    Strip trailing whitespaces from status line.
     """
     if _is_merge(status_line):
         return None
@@ -68,8 +71,14 @@ def check_status_formatting(status_line):
         errors.append("Remove space between type and scope.")
     if len(match.group(4)) > 0:
         errors.append("Remove space between scope and colon.")
-    if not match.group(5).startswith(" "):
+    if match.group(5) != " ":
         errors.append("Add space after colon.")
+    if not match.group(6)[0].isupper():
+        errors.append("Uppercase the first character of the subject.")
+    if len(match.group(6).strip()) < 3:
+        errors.append("Make subject at least three character long.")
+    if len(match.group(7)) > 0:
+        errors.append("Strip trailing whitespaces from status line.")
     if len(errors) == 0:
         return None
     else:

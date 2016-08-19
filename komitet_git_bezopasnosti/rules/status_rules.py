@@ -3,7 +3,8 @@ import re
 from ..config import MAX_STATUS_LENGTH
 from ..config import TYPES
 
-status_pattern = re.compile("""^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(.*)$""")
+status_pattern = re.compile(
+    """^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\w)(\s*)$""")
 
 spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")
 
@@ -68,7 +69,7 @@ def check_status_formatting(status_line):
         errors.append("Remove space between type and scope.")
     if len(match.group(4)) > 0:
         errors.append("Remove space between scope and colon.")
-    if not match.group(5).startswith(" "):
+    if match.group(5) != " ":
         errors.append("Add space after colon.")
     if len(errors) == 0:
         return None

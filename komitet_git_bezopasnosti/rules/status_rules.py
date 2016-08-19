@@ -53,8 +53,9 @@ def check_status_formatting(status_line):
     Remove space between scope and colon.
     Use a single space between colon and subject
 
-    >>> print(check_status_formatting("fix(this):N  "))
+    >>> print(check_status_formatting("fix(this):n  "))
     Add space after colon.
+    Uppercase the first character of the subject.
     Make subject at least three character long.
     Strip trailing whitespaces from status line.
     """

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from os import environ as env
 
 # Identifier used to recognize auto-generated comments

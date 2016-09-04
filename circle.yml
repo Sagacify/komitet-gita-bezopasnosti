@@ -13,4 +13,4 @@ dependencies:
 
 test:
   override:
-    - docker-compose run py py.test --doctest-modules komitet_git_bezopasnosti
+    - docker-compose run py py.test --doctest-modules kgitb

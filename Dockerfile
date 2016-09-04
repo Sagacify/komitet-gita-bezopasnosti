@@ -5,7 +5,7 @@ WORKDIR /var/www
 COPY ./requirements.txt /var/www/requirements.txt
 RUN pip3 install -r requirements.txt
 
-COPY ./komitet_git_bezopasnosti /var/www/komitet_git_bezopasnosti
+COPY ./kgitb /var/www/kgitb
 
 EXPOSE 5000
-CMD ["python3", "-m", "komitet_git_bezopasnosti"]
+CMD ["python3", "-m", "kgitb"]

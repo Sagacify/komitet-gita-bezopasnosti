@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 
 def protect(string):
-    return string.replace("[", "\[")
+    return string.replace("[", r"\[")
 
 
 def quote(string):

@@ -38,6 +38,10 @@ _raw_rules = _get_rules(raw_rules)
 _status_rules = _get_rules(status_rules)
 
 
+def _is_merge(status_line):
+    return status_line.startswith("Merge pull request #")
+
+
 def split_lines(commit_message):
     return re.split('\r?\n', commit_message)
 
@@ -45,6 +49,8 @@ def split_lines(commit_message):
 def apply(commit_message):
     """Apply all rules to the commit message."""
     errors = []
+    if _is_merge(commit_message):
+        return errors
     for rule in _raw_rules:
         err = rule(commit_message)
         if err is not None:
@@ -58,4 +64,4 @@ def apply(commit_message):
         err = check(commit_lines)
         if err is not None:
             errors.append(err)
-    return(errors)
+    return errors

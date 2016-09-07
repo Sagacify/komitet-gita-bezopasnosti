@@ -6,7 +6,11 @@ import os
 import io
 import shutil
 from tempfile import mkstemp
-from kgitb.rules import apply_rules
+
+print(sys.path)
+print(sys.executable)
+
+from kgitb import rules
 
 
 ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
@@ -131,7 +135,7 @@ def lint_files(file_paths):
     errors = []
     for file_path in file_paths:
         with io.open(file_path) as message:
-            errors.append(apply_rules(message))
+            errors.append(rules.apply_rules(message))
     if len(file_paths) == 1 and errors[0] is not None:
         format_errrors(errors[0])
         return False
@@ -148,15 +152,16 @@ def lint(arguments):
     """Lint message or file(s) passed."""
     if arguments.message:
         for message in arguments.message:
-            errors = apply_rules(message)
+            errors = rules.apply_rules(message)
             if errors:
-                format_errrors(file_errors, "your message.")
+                format_errrors(errors, "your message.")
                 sys.exit(18)
     elif arguments.file:
         if not lint_files(arguments.file):
             sys.exit(18)
     else:
         print(ERROR_MESSAGE)
+    print("APPROVED BY THE KGitB.")
 
 
 def install(arguments):

@@ -6,11 +6,8 @@ import os
 import io
 import shutil
 from tempfile import mkstemp
-
-print(sys.path)
-print(sys.executable)
-
 from kgitb import rules
+import stat
 
 
 ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
@@ -118,6 +115,8 @@ def setup_hook(repo_path):
         command = get_params(arguments)
         (upsert(hook_path, command, arguments.force) or
          create(hook_path, command))
+        st = os.stat(hook_path)
+        os.chmod(hook_path, st.st_mode | stat.S_IXUSR)
     else:
         raise ValueError(u"%s is not a git directory." % repo_path)
 

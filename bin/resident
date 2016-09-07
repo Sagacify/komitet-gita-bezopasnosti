@@ -1,0 +1,162 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import argparse
+import sys
+import os
+import io
+import shutil
+from tempfile import mkstemp
+
+
+ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
+https//github.com/sagacify/komitet-gita-bezopasnosti
+Thank you.
+"""
+
+parser = argparse.ArgumentParser(description='Commit message linter.')
+subparsers = parser.add_subparsers(help='commands')
+
+# install parser
+install_parser = subparsers.add_parser('install', help='Set up web hooks')
+install_parser.set_defaults(which="install")
+
+install_parser.add_argument(
+    "-f", "--force", action="store_true", default=False,
+    help="Overwrite existing hook.")
+
+location = install_parser.add_mutually_exclusive_group()
+location.set_defaults(location='local')
+location.add_argument(
+    '--local', action="store_const", dest='location', const="local",
+    help="Installs resident to the local git directory (default)")
+location.add_argument(
+    '--global', action="store_const", dest='location', const="global",
+    help="Installs resident as a global hook")
+location.add_argument(
+    '--path', action="store", nargs='+', dest='location',
+    help="Installs resident as a local hook in\n" +
+    "the git director(y/ies) provided")
+
+# lint parser
+linter_parser = subparsers.add_parser(
+    "lint", help="Lint commit or file containing commit")
+linter_parser.set_defaults(which="lint")
+
+what = linter_parser.add_mutually_exclusive_group(required=True)
+what.add_argument(
+    '--file', nargs="+", help='File(s) to check.')
+what.add_argument("-m", "--message", nargs=1, help='message to lint')
+
+
+def ensure_git_dir(path):
+    """Check if path leads to a git repository.
+
+    Return the path to the correct hook if it is, False otherwise.
+    """
+    if os.path.isdir(os.path.join(os.getcwd(), ".git")):
+        return os.path.join(path, ".git", "hooks", "commit-msg")
+    return False
+
+
+def get_params(arguments):
+    """Use given arguments to generate hook command.
+
+    Empty for now, options will be added.
+    """
+    return u"""resident lint --file $1\n"""
+
+
+def upsert(hook_path, command, overwrite=False):
+    """Check if hook already exists.
+
+    Overwrites it or not depending on the setting.
+    """
+    if not os.path.isfile(hook_path):
+        return False
+
+    result = False
+    temp_fh, temp_path = mkstemp()
+    with open(temp_path, "w") as temp:
+        with io.open(hook_path) as old_file:
+            for line in old_file:
+                if line.startswith("resident "):
+                    if overwrite:
+                        temp.write(command)
+                    else:
+                        print("WARN:  resident is already installed in %s" %
+                              hook_path)
+                    result = True
+                else:
+                    temp.write(line)
+    os.close(temp_fh)
+    if result:
+        os.remove(hook_path)
+        shutil.move(temp_path, hook_path)
+    else:
+        os.remove(temp_path)
+    return result
+
+
+def create(hook_path, command):
+    """Create hook."""
+    with io.open(hook_path, "w") as hook:
+        hook.write(u"""#!/usr/bin/env sh
+
+        %s""" % command)
+    return True
+
+
+def setup_hook(repo_path):
+    """Setup hoook in given git repository."""
+    hook_path = ensure_git_dir(repo_path)
+    if hook_path:
+        command = get_params(arguments)
+        (upsert(hook_path, command, arguments.force) or
+         create(hook_path, command))
+    else:
+        raise ValueError(u"%s is not a git directory." % repo_path)
+
+
+def lint(arguments):
+    """Lint message or file(s) passed."""
+    if arguments.message:
+        for message in arguments.message:
+            print(arguments.message)
+    elif arguments.file:
+        for file in arguments.file:
+            print("Linting: ", file)
+    else:
+        print(ERROR_MESSAGE)
+
+
+def install(arguments):
+    """Install resident in the given location."""
+    if arguments.location == "global":
+        print("Sorry, this feature hasn't been implemented yet")
+        sys.exit(-1)
+    elif arguments.location == "local":
+        setup_hook(os.getcwd())
+    elif isinstance(arguments.location, list):
+        errors = 0
+        for path in arguments.location:
+            try:
+                setup_hook(path)
+            except Exception as err:
+                print("Skipping ", path, " because:\n", err)
+        if errors != 0:
+            print("There where %d errors." % errors)
+            sys.exit(-2)
+    else:
+        print(ERROR_MESSAGE)
+
+if __name__ == '__main__':
+    arguments = parser.parse_args()
+    print(arguments)
+    if arguments.which == "install":
+        install(arguments)
+    elif arguments.which == "lint":
+        lint(arguments)
+    else:
+        print("Uh?")
+else:
+    print("Why the hell are you importing an executable?")

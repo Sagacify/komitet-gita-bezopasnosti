@@ -6,6 +6,7 @@ import os
 import io
 import shutil
 from tempfile import mkstemp
+from kgitb.rules import apply_rules
 
 
 ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
@@ -117,14 +118,43 @@ def setup_hook(repo_path):
         raise ValueError(u"%s is not a git directory." % repo_path)
 
 
+def format_errrors(errors, file="your commit message."):
+    if errors == 1:
+        print("The following error was found %s" % file)
+        print(errors[0])
+    else:
+        print("The following errors were found %s" % file)
+        print("\n".join(errors))
+
+
+def lint_files(file_paths):
+    errors = []
+    for file_path in file_paths:
+        with io.open(file_path) as message:
+            errors.append(apply_rules(message))
+    if len(file_paths) == 1 and errors[0] is not None:
+        format_errrors(errors[0])
+        return False
+    else:
+        result = True
+        for file_path, file_errors in zip(file_paths, errors):
+            if file_errors is not None:
+                format_errrors(file_errors, file_path)
+                result = False
+        return result
+
+
 def lint(arguments):
     """Lint message or file(s) passed."""
     if arguments.message:
         for message in arguments.message:
-            print(arguments.message)
+            errors = apply_rules(message)
+            if errors:
+                format_errrors(file_errors, "your message.")
+                sys.exit(18)
     elif arguments.file:
-        for file in arguments.file:
-            print("Linting: ", file)
+        if not lint_files(arguments.file):
+            sys.exit(18)
     else:
         print(ERROR_MESSAGE)
 

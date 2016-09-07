@@ -46,7 +46,7 @@ def split_lines(commit_message):
     return re.split('\r?\n', commit_message)
 
 
-def apply(commit_message):
+def apply_rules(commit_message):
     """Apply all rules to the commit message."""
     errors = []
     if _is_merge(commit_message):

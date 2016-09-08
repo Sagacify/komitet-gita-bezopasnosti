@@ -4,8 +4,6 @@ import argparse
 import sys
 import os
 import io
-import shutil
-from tempfile import mkstemp
 from kgitb import rules
 import stat
 import inspect
@@ -17,34 +15,39 @@ https//github.com/sagacify/komitet-gita-bezopasnosti
 Thank you.
 """
 
+
+def location_arguments(parser):
+    """Add location argument to an argument parser."""
+    location = parser.add_mutually_exclusive_group()
+    location.set_defaults(location='local')
+    location.add_argument(
+        '--local', action="store_const", dest='location', const="local",
+        help="Installs resident to the local git directory (default)")
+    location.add_argument(
+        '--global', action="store_const", dest='location', const="global",
+        help="Installs resident as a global hook")
+    location.add_argument(
+        '--path', action="store", nargs='+', dest='location',
+        help="Installs resident as a local hook in\n" +
+        "the git director(y/ies) provided")
+    return parser
+
+
 parser = argparse.ArgumentParser(description='Commit message linter.')
-subparsers = parser.add_subparsers(help='commands')
+subparsers = parser.add_subparsers(help='commands', dest="cmd")
+subparsers.required = True
+
+# uninstall parser
+uninstall_parser = subparsers.add_parser('uninstall', help='Remove web hooks')
+location_arguments(uninstall_parser)
 
 # install parser
 install_parser = subparsers.add_parser('install', help='Set up web hooks')
-install_parser.set_defaults(which="install")
-
-install_parser.add_argument(
-    "-f", "--force", action="store_true", default=False,
-    help="Overwrite existing hook.")
-
-location = install_parser.add_mutually_exclusive_group()
-location.set_defaults(location='local')
-location.add_argument(
-    '--local', action="store_const", dest='location', const="local",
-    help="Installs resident to the local git directory (default)")
-location.add_argument(
-    '--global', action="store_const", dest='location', const="global",
-    help="Installs resident as a global hook")
-location.add_argument(
-    '--path', action="store", nargs='+', dest='location',
-    help="Installs resident as a local hook in\n" +
-    "the git director(y/ies) provided")
+location_arguments(install_parser)
 
 # lint parser
 linter_parser = subparsers.add_parser(
     "lint", help="Lint commit or file containing commit")
-linter_parser.set_defaults(which="lint")
 
 what = linter_parser.add_mutually_exclusive_group(required=True)
 what.add_argument(
@@ -55,80 +58,106 @@ what.add_argument("-m", "--message", nargs=1, help='message to lint')
 def ensure_git_dir(path):
     """Check if path leads to a git repository.
 
-    Return the path to the correct hook if it is, False otherwise.
+    Return the path to the correct hook if it is,
+    raisess a ValueError otherwise.
     """
     if os.path.isdir(os.path.join(path, ".git")):
         return os.path.join(path, ".git", "hooks", "commit-msg")
-    return False
+    raise ValueError(u"%s is not a git directory." % path)
 
 
-def get_params(arguments):
-    """Use given arguments to generate hook command.
+def get_lint_command():
+    """Generate lint command to be added to the hook executable.
 
-    Empty for now, options will be added.
+    Uses resident's full path to avoid issues with programse executing git
+    commands without resident in their PATH (Sourcetree I'm thinking of you).
     """
-    return u"""{0} lint --file $1\n""".format(
-        os.path.abspath(inspect.getsourcefile(lambda: 0)))
+    return u"""{0} lint --file $1{1}""".format(
+        os.path.abspath(inspect.getsourcefile(lambda: 0)),
+        os.linesep)
 
 
-def upsert(hook_path, command, overwrite=False):
-    """Check if hook already exists.
+PATTERN = re.compile(r"^\s*\S*{}resident ".format(re.escape(os.path.sep)))
 
-    Overwrites it or not depending on the setting.
+
+def locate_command_in_hook(hook_path):
+    """Locate the resident command in a hook file.
+
+    Given a path to a hook_path, it will return false if the hook doesn't
+    contain the file and an array with the lines in the hook minus the
+    command if it doesn't find the hook.
     """
     if not os.path.isfile(hook_path):
         return False
 
-    insterted = False
-    temp_fh, temp_path = mkstemp()
-    with open(temp_path, "w") as temp:
-        with io.open(hook_path) as old_file:
-            for line in old_file:
-                match = re.match(r"^\s*\S*(\S)resident ", line)
-                if (not insterted and match is not None and
-                                      match.group(1) == os.path.sep):
-                    if overwrite:
-                        temp.write(command)
-                    else:
-                        print("WARN:  resident is already installed in %s" %
-                              hook_path)
-                        temp.write(line)
-                    insterted = True
-                else:
-                    temp.write(line)
-    os.close(temp_fh)
-    if insterted:
-        os.remove(hook_path)
-        shutil.move(temp_path, hook_path)
+    with io.open(hook_path) as old_hook:
+        lines = old_hook.readlines()
+
+    filtered_lines = [line for line in lines if not PATTERN.match(line)]
+
+    if len(filtered_lines) == len(lines):
+        return False
+    elif len(filtered_lines) == (len(lines) - 1):
+        return filtered_lines
+    elif len(filtered_lines) < len(lines):
+        print("WARN: MULTIPLE MATCHES WHERE REMOVED.")
+        return filtered_lines
     else:
-        os.remove(temp_path)
-        with io.open(hook_path, "a") as hook_file:
-            hook_file.write(u"{0}{1}".format(command, os.linesep))
-    return True
+        raise Exception("THIS_SHOULD_NEVER_HAPPEN")
 
 
-def create(hook_path, command):
-    """Create hook."""
-    with io.open(hook_path, "w") as hook:
-        hook.write(u"#!/usr/bin/env sh{0}{0}{1}{0}".format(
-            os.linesep, command))
-    return True
+def setup_hook(repo_path, command):
+    """Setup resident in the commit-msg hoook in given git repository.
 
-
-def setup_hook(repo_path):
-    """Setup hoook in given git repository."""
+    Overwrite the existing command if there is one already,
+    append to the existing file if there is one,
+    or creeate a new executable shell script if there isn't one.
+    """
     hook_path = ensure_git_dir(repo_path)
-    if hook_path:
-        command = get_params(arguments)
-        (upsert(hook_path, command, arguments.force) or
-         create(hook_path, command))
-        st = os.stat(hook_path)
-        os.chmod(hook_path, st.st_mode | stat.S_IXUSR)
+    filtered_existing = locate_command_in_hook(hook_path)
+
+    if filtered_existing is False:
+        if os.path.isfile(hook_path):
+            with io.open(hook_path, "a") as new_hook:
+                new_hook.write(os.linesep + command)
+        else:
+            with io.open(hook_path, "w") as hook:
+                hook.write(u"#!/usr/bin/env sh{}".format(os.linesep + command))
     else:
-        raise ValueError(u"%s is not a git directory." % repo_path)
+        if not filtered_existing[-1].endswith(os.linesep):
+            command = os.linesep + command
+        filtered_existing.append(command)
+        with io.open(hook_path, "w") as new_hook:
+            new_hook.write("".join(filtered_existing))
+
+    st = os.stat(hook_path)
+    os.chmod(hook_path, st.st_mode | stat.S_IXUSR)
+
+
+def remove_hook(repo_path):
+    """Remove resident from the commit-msg hoook in given git repository.
+
+    Replace resident command by empty string if it is present in the hook,
+    If the rest of the hook contains only whitespaces and comments,
+    remove the commit-msg hook entirely.
+    """
+    hook_path = ensure_git_dir(repo_path)
+    filtered_existing = locate_command_in_hook(hook_path)
+    if filtered_existing is False:
+        raise ValueError("NOT INSTALLED")
+
+    if [l for l in filtered_existing if not(l.startswith("#") or
+                                            re.match("^\s*$", l))]:
+        st = os.stat(hook_path)
+        with io.open(hook_path, "w") as new_hook:
+            new_hook.write("".join(filtered_existing))
+        os.chmod(hook_path, st.st_mode)
+    else:
+        os.remove(hook_path)
 
 
 def format_errrors(errors, file="your commit message."):
+    """Pretty print kgb's comments."""
     if len(errors) == 1:
         print("The following error was found %s" % file)
         print(errors[0])
@@ -138,6 +167,7 @@ def format_errrors(errors, file="your commit message."):
 
 
 def lint_files(file_paths):
+    """Lint one or more files."""
     errors = []
     for file_path in file_paths:
         with io.open(file_path) as message:
@@ -157,11 +187,10 @@ def lint_files(file_paths):
 def lint(arguments):
     """Lint message or file(s) passed."""
     if arguments.message:
-        for message in arguments.message:
-            errors = rules.apply_rules(message)
-            if errors:
-                format_errrors(errors, "your message.")
-                sys.exit(18)
+        errors = rules.apply_rules(arguments.message[0])
+        if errors:
+            format_errrors(errors, "your message.")
+            sys.exit(18)
     elif arguments.file:
         if not lint_files(arguments.file):
             sys.exit(18)
@@ -170,18 +199,26 @@ def lint(arguments):
     print("APPROVED BY THE KGitB.")
 
 
-def install(arguments):
-    """Install resident in the given location."""
-    if arguments.location == "global":
+def get_location(location, command):
+    """Apply command in location.
+
+    Be it setting up or cleaning up,
+    this function will apply the command to all given locations
+    """
+    if location == "global":
         print("Sorry, this feature hasn't been implemented yet")
         sys.exit(-1)
-    elif arguments.location == "local":
-        setup_hook(os.getcwd())
-    elif isinstance(arguments.location, list):
+    elif location == "local":
+        try:
+            command(os.getcwd())
+        except ValueError as error:
+            print(error)
+            sys.exit(-1)
+    elif isinstance(location, list):
         errors = 0
-        for path in arguments.location:
+        for path in location:
             try:
-                setup_hook(path)
+                command(path)
             except Exception as err:
                 print("Skipping ", path, " because:\n", err)
         if errors:
@@ -192,9 +229,13 @@ def install(arguments):
 
 if __name__ == '__main__':
     arguments = parser.parse_args()
-    if arguments.which == "install":
-        install(arguments)
-    elif arguments.which == "lint":
+    if arguments.cmd == "install":
+        get_location(arguments.location,
+                     lambda x: setup_hook(x, get_lint_command()))
+    elif arguments.cmd == "uninstall":
+        get_location(arguments.location,
+                     remove_hook)
+    elif arguments.cmd == "lint":
         lint(arguments)
     else:
         print("Uh?")

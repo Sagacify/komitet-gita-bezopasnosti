@@ -57,7 +57,7 @@ def ensure_git_dir(path):
 
     Return the path to the correct hook if it is, False otherwise.
     """
-    if os.path.isdir(os.path.join(os.getcwd(), ".git")):
+    if os.path.isdir(os.path.join(path, ".git")):
         return os.path.join(path, ".git", "hooks", "commit-msg")
     return False
 

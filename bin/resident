@@ -8,6 +8,7 @@ import shutil
 from tempfile import mkstemp
 from kgitb import rules
 import stat
+import inspect
 
 
 ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
@@ -65,7 +66,8 @@ def get_params(arguments):
 
     Empty for now, options will be added.
     """
-    return u"""resident lint --file $1\n"""
+    return u"""{0} lint --file $1\n""".format(
+        os.path.abspath(inspect.getsourcefile(lambda: 0)))
 
 
 def upsert(hook_path, command, overwrite=False):
@@ -102,9 +104,8 @@ def upsert(hook_path, command, overwrite=False):
 def create(hook_path, command):
     """Create hook."""
     with io.open(hook_path, "w") as hook:
-        hook.write(u"""#!/usr/bin/env sh
-
-        %s""" % command)
+        hook.write(u"#!/usr/bin/env sh{0}{0}{1}{0}".format(
+            os.linesep, command))
     return True
 
 

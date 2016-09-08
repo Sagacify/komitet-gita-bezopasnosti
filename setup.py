@@ -18,7 +18,7 @@ setup(
     name='kgitb',
     packages=['kgitb', 'kgitb.rules'],
     scripts=['bin/resident'],
-    version='0.0.4',
+    version='0.0.5',
     description='A commit message linter',
     long_description=read_md('README.md'),
     author='Augustin Borsu',

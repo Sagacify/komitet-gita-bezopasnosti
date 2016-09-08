@@ -72,3 +72,13 @@ and run the tests using:
 ```
 tox
 ````
+
+# Publish
+* generate README.rst
+```
+pandoc --from=markdown --to=rst --output=README.rst README.md
+```
+* publish
+```
+python setup.py sdist upload
+```

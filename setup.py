@@ -1,31 +1,25 @@
 from distutils.core import setup
 import io
+import os
 
-try:
-    from pypandoc import convert
 
-    def read_md(file):
-        convert(file, 'rst')
-
-except ImportError:
-    print("warning: pypandoc module not found, could not convert Markdown to RST")
-
-    def read_md(file):
-        io.open(file, 'r', encoding="utf-8").read()
-
+readme = "README.md"
+if os.path.isfile("./README.rst"):
+    readme = "README.rst"
+print("Using %s as readme" % readme)
 
 setup(
     name='kgitb',
     packages=['kgitb', 'kgitb.rules'],
     scripts=['bin/resident'],
-    version='0.0.5',
+    version='0.0.6',
     description='A commit message linter',
-    long_description=read_md('README.md'),
+    long_description=io.open(readme, encoding="utf-8").read(),
     author='Augustin Borsu',
     author_email='dev@sagacify.com',
     url='https://github.com/Sagacify/komitet-gita-bezopasnosti',
     extras_require={
-        'WEB':  ["flask", "requests"]
+        'WEB': ["flask", "requests"]
     },
     classifiers=[
         'Development Status :: 4 - Beta',

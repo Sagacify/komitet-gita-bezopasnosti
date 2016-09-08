@@ -15,9 +15,9 @@ to the commit messages.
 ... We try to make explanations as understandable as possible but we have some
 ... \tissues with code consistency.'''
 
->>> len(apply(good_message))
+>>> len(apply_rules(good_message))
 0
->>> len(apply(bad_message))
+>>> len(apply_rules(bad_message))
 5
 """
 

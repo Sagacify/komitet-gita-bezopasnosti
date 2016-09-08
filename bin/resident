@@ -9,6 +9,7 @@ from tempfile import mkstemp
 from kgitb import rules
 import stat
 import inspect
+import re
 
 
 ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
@@ -78,27 +79,32 @@ def upsert(hook_path, command, overwrite=False):
     if not os.path.isfile(hook_path):
         return False
 
-    result = False
+    insterted = False
     temp_fh, temp_path = mkstemp()
     with open(temp_path, "w") as temp:
         with io.open(hook_path) as old_file:
             for line in old_file:
-                if line.startswith("resident "):
+                match = re.match(r"^\s*\S*(\S)resident ", line)
+                if (not insterted and match is not None and
+                                      match.group(1) == os.path.sep):
                     if overwrite:
                         temp.write(command)
                     else:
                         print("WARN:  resident is already installed in %s" %
                               hook_path)
-                    result = True
+                        temp.write(line)
+                    insterted = True
                 else:
                     temp.write(line)
     os.close(temp_fh)
-    if result:
+    if insterted:
         os.remove(hook_path)
         shutil.move(temp_path, hook_path)
     else:
         os.remove(temp_path)
-    return result
+        with io.open(hook_path, "a") as hook_file:
+            hook_file.write(u"{0}{1}".format(command, os.linesep))
+    return True
 
 
 def create(hook_path, command):

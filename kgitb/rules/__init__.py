@@ -9,6 +9,7 @@ to the commit messages.
 ... We used docstrings to keep the tests as close as possible to the codes.
 ... Look! That line was exactly 72 characters long!!!
 ... Yes I know that came at the price of an extra s at code.
+... # This\tline should be ignored as it is a comment. So any violation should
 ... '''
 
 >>> bad_message = '''fixes(k g b): Make it quick and dirty, make it bads
@@ -50,6 +51,8 @@ def apply_rules(commit_message):
     if _is_merge(commit_message):
         return errors
     commit_lines = split_lines(commit_message)
+    status = commit_lines[0]
+    commit_lines = [l for l in commit_lines if not l.startswith("#")]
     for rule in _status_rules:
         err = rule(commit_lines[0])
         if err is not None:

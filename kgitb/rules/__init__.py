@@ -24,7 +24,6 @@ to the commit messages.
 import re
 from inspect import getmembers, isfunction
 from . import line_rules
-from . import raw_rules
 from . import status_rules
 
 
@@ -34,7 +33,6 @@ def _get_rules(module):
             if tup[0][0] != "_"]
 
 _line_rules = _get_rules(line_rules)
-_raw_rules = _get_rules(raw_rules)
 _status_rules = _get_rules(status_rules)
 
 
@@ -51,10 +49,6 @@ def apply_rules(commit_message):
     errors = []
     if _is_merge(commit_message):
         return errors
-    for rule in _raw_rules:
-        err = rule(commit_message)
-        if err is not None:
-            errors.append(err)
     commit_lines = split_lines(commit_message)
     for rule in _status_rules:
         err = rule(commit_lines[0])

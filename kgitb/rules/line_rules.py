@@ -22,6 +22,19 @@ def check_body_line_length(commit_lines):
     >>> check_body_line_length(["", "", "TOO_LONG" * 10])
     'Wrap body lines at 72 characters'
     """
-    for line in commit_lines[1:]:
+    for line in commit_lines:
         if len(line) > MAX_LINE_LENGTH:
             return "Wrap body lines at {0} characters".format(MAX_LINE_LENGTH)
+
+
+def check_for_tabs(commit_lines):
+    r"""Check for tabs.
+
+    >>> check_for_tabs(["This is a good commit."])
+
+    >>> check_for_tabs(["This is a\tbad commit."])
+    'Use soft tabs!'
+    """
+    for line in commit_lines:
+        if line.find("\t") != -1:
+            return "Use soft tabs!"

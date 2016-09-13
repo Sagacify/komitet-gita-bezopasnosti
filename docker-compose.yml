@@ -3,5 +3,5 @@ py:
   ports:
     - "17100:5000"
   volumes:
-    - ./komitet_git_bezopasnosti:/var/www/komitet_git_bezopasnosti
+    - ./kgitb:/var/www/kgitb
     - ./requirements.txt:/var/www/requirements.txt

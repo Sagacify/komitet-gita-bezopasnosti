@@ -1,16 +1,16 @@
 machine:
-  environment:
-    COMPOSE_PROJECT_NAME: $CIRCLE_PROJECT_REPONAME
-  services:
-    - docker
+  java:
+    version: openjdk8
 
 dependencies:
   override:
-    - docker info
-    - docker-compose --version
-    - docker-compose pull
-    - docker-compose build
+    - wget https://raw.githubusercontent.com/Sagacify/ci-tools/master/run-sonar.sh
+    - chmod +x run-sonar.sh
+    - ./run-sonar.sh check
+    - ./run-sonar.sh install
+    - pip install tox pylint
 
 test:
   override:
-    - docker-compose run py py.test --doctest-modules komitet_git_bezopasnosti
+    - tox
+    - ./run-sonar.sh run

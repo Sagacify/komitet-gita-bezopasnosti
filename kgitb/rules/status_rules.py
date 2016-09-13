@@ -3,16 +3,10 @@ import re
 from ..config import MAX_STATUS_LENGTH
 from ..config import TYPES
 
-status_pattern = re.compile(
-    """^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\w)(\s*)$""")
+STATUS_PATTERN = re.compile(
+    r"^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\w)(\s*)$")
 
-spaces = re.compile("\w*\s+\w*\(|\w+\(.*[^\w].*\):")
-
-_type_string = ", ".join(sorted(TYPES))
-
-
-def _is_merge(status_line):
-    return status_line.startswith("Merge pull request #")
+PRETTY_TYPES = ", ".join(sorted(TYPES))
 
 
 def check_status_length(status_line):
@@ -23,9 +17,8 @@ def check_status_length(status_line):
     >>> check_status_length("TOO_LONG" * 10)
     'Limit status to 50 characters'
     """
-    if not _is_merge(status_line):
-        if len(status_line) > MAX_STATUS_LENGTH:
-            return "Limit status to {0} characters".format(MAX_STATUS_LENGTH)
+    if len(status_line) > MAX_STATUS_LENGTH:
+        return "Limit status to {0} characters".format(MAX_STATUS_LENGTH)
 
 
 def check_status_formatting(status_line):
@@ -59,16 +52,14 @@ def check_status_formatting(status_line):
     Make subject at least three character long.
     Strip trailing whitespaces from status line.
     """
-    if _is_merge(status_line):
-        return None
-    match = status_pattern.match(status_line)
-    if (match is None):
+    match = STATUS_PATTERN.match(status_line)
+    if match is None:
         return ("Conform status to `<type>(<scope>): <subject>` pattern\n" +
                 "type and scope cannot contain spaces or parenthesis")
     errors = []
     if match.group(1) not in TYPES:
         errors.append("Status must start with one of the following types:\n" +
-                      "*%s*" % _type_string)
+                      "*%s*" % PRETTY_TYPES)
     if len(match.group(2)) > 0:
         errors.append("Remove space between type and scope.")
     if len(match.group(4)) > 0:

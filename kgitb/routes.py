@@ -13,7 +13,7 @@ def check_pr(commits_url, comments_url, status_url):
     messages = []
     for commit in github.get_commits(commits_url):
         message = commit["commit"]["message"]
-        errors = rules.apply(message)
+        errors = rules.apply_rules(message)
         if len(errors) > 0:
             sha = commit["sha"]
             messages.append("\n".join([sha, github.quote(message), ""] +

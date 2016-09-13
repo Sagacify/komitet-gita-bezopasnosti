@@ -1,5 +1,2 @@
 flask
 requests
-
-# dev-dependencies
-pytest

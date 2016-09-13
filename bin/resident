@@ -1,0 +1,243 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import argparse
+import sys
+import os
+import io
+from kgitb import rules
+import stat
+import inspect
+import re
+
+
+ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
+https//github.com/sagacify/komitet-gita-bezopasnosti
+Thank you.
+"""
+
+
+def location_arguments(parser):
+    """Add location argument to an argument parser."""
+    location = parser.add_mutually_exclusive_group()
+    location.set_defaults(location='local')
+    location.add_argument(
+        '--local', action="store_const", dest='location', const="local",
+        help="Installs resident to the local git directory (default)")
+    location.add_argument(
+        '--global', action="store_const", dest='location', const="global",
+        help="Installs resident as a global hook")
+    location.add_argument(
+        '--path', action="store", nargs='+', dest='location',
+        help="Installs resident as a local hook in\n" +
+        "the git director(y/ies) provided")
+    return parser
+
+
+parser = argparse.ArgumentParser(description='Commit message linter.')
+subparsers = parser.add_subparsers(help='commands', dest="cmd")
+subparsers.required = True
+
+# uninstall parser
+uninstall_parser = subparsers.add_parser('uninstall', help='Remove web hooks')
+location_arguments(uninstall_parser)
+
+# install parser
+install_parser = subparsers.add_parser('install', help='Set up web hooks')
+location_arguments(install_parser)
+
+# lint parser
+linter_parser = subparsers.add_parser(
+    "lint", help="Lint commit or file containing commit")
+
+what = linter_parser.add_mutually_exclusive_group(required=True)
+what.add_argument(
+    '--file', nargs="+", help='File(s) to check.')
+what.add_argument("-m", "--message", nargs=1, help='message to lint')
+
+
+def ensure_git_dir(path):
+    """Check if path leads to a git repository.
+
+    Return the path to the correct hook if it is,
+    raisess a ValueError otherwise.
+    """
+    if os.path.isdir(os.path.join(path, ".git")):
+        return os.path.join(path, ".git", "hooks", "commit-msg")
+    raise ValueError(u"%s is not a git directory." % path)
+
+
+def get_lint_command():
+    """Generate lint command to be added to the hook executable.
+
+    Uses resident's full path to avoid issues with programse executing git
+    commands without resident in their PATH (Sourcetree I'm thinking of you).
+    """
+    return u"""{0} lint --file $1{1}""".format(
+        os.path.abspath(inspect.getsourcefile(lambda: 0)),
+        os.linesep)
+
+
+PATTERN = re.compile(r"^\s*\S*{}resident ".format(re.escape(os.path.sep)))
+
+
+def locate_command_in_hook(hook_path):
+    """Locate the resident command in a hook file.
+
+    Given a path to a hook_path, it will return false if the hook doesn't
+    contain the file and an array with the lines in the hook minus the
+    command if it doesn't find the hook.
+    """
+    if not os.path.isfile(hook_path):
+        return False
+
+    with io.open(hook_path) as old_hook:
+        lines = old_hook.readlines()
+
+    filtered_lines = [line for line in lines if not PATTERN.match(line)]
+
+    if len(filtered_lines) == len(lines):
+        return False
+    elif len(filtered_lines) == (len(lines) - 1):
+        return filtered_lines
+    elif len(filtered_lines) < len(lines):
+        print("WARN: MULTIPLE MATCHES WHERE REMOVED.")
+        return filtered_lines
+    else:
+        raise Exception("THIS_SHOULD_NEVER_HAPPEN")
+
+
+def setup_hook(repo_path, command):
+    """Setup resident in the commit-msg hoook in given git repository.
+
+    Overwrite the existing command if there is one already,
+    append to the existing file if there is one,
+    or creeate a new executable shell script if there isn't one.
+    """
+    hook_path = ensure_git_dir(repo_path)
+    filtered_existing = locate_command_in_hook(hook_path)
+
+    if filtered_existing is False:
+        if os.path.isfile(hook_path):
+            with io.open(hook_path, "a") as new_hook:
+                new_hook.write(os.linesep + command)
+        else:
+            with io.open(hook_path, "w") as hook:
+                hook.write(u"#!/usr/bin/env sh{}".format(os.linesep + command))
+    else:
+        if not filtered_existing[-1].endswith(os.linesep):
+            command = os.linesep + command
+        filtered_existing.append(command)
+        with io.open(hook_path, "w") as new_hook:
+            new_hook.write("".join(filtered_existing))
+
+    st = os.stat(hook_path)
+    os.chmod(hook_path, st.st_mode | stat.S_IXUSR)
+
+
+def remove_hook(repo_path):
+    """Remove resident from the commit-msg hoook in given git repository.
+
+    Replace resident command by empty string if it is present in the hook,
+    If the rest of the hook contains only whitespaces and comments,
+    remove the commit-msg hook entirely.
+    """
+    hook_path = ensure_git_dir(repo_path)
+    filtered_existing = locate_command_in_hook(hook_path)
+    if filtered_existing is False:
+        raise ValueError("NOT INSTALLED")
+
+    if [l for l in filtered_existing if not(l.startswith("#") or
+                                            re.match("^\s*$", l))]:
+        st = os.stat(hook_path)
+        with io.open(hook_path, "w") as new_hook:
+            new_hook.write("".join(filtered_existing))
+        os.chmod(hook_path, st.st_mode)
+    else:
+        os.remove(hook_path)
+
+
+def format_errrors(errors, file="your commit message."):
+    """Pretty print kgb's comments."""
+    if len(errors) == 1:
+        print("The following error was found %s" % file)
+        print(errors[0])
+    else:
+        print("The following errors were found %s" % file)
+        print("\n".join(errors))
+
+
+def lint_files(file_paths):
+    """Lint one or more files."""
+    errors = []
+    for file_path in file_paths:
+        with io.open(file_path) as message:
+            errors.append(rules.apply_rules(message.read()))
+    if (len(file_paths) == 1) and errors[0]:
+        format_errrors(errors[0])
+        return False
+    else:
+        result = True
+        for file_path, file_errors in zip(file_paths, errors):
+            if file_errors:
+                format_errrors(file_errors, file_path)
+                result = False
+        return result
+
+
+def lint(arguments):
+    """Lint message or file(s) passed."""
+    if arguments.message:
+        errors = rules.apply_rules(arguments.message[0])
+        if errors:
+            format_errrors(errors, "your message.")
+            sys.exit(18)
+    elif arguments.file:
+        if not lint_files(arguments.file):
+            sys.exit(18)
+    else:
+        print(ERROR_MESSAGE)
+    print("APPROVED BY THE KGitB.")
+
+
+def get_location(location, command):
+    """Apply command in location.
+
+    Be it setting up or cleaning up,
+    this function will apply the command to all given locations
+    """
+    if location == "global":
+        print("Sorry, this feature hasn't been implemented yet")
+        sys.exit(-1)
+    elif location == "local":
+        try:
+            command(os.getcwd())
+        except ValueError as error:
+            print(error)
+            sys.exit(-1)
+    elif isinstance(location, list):
+        errors = 0
+        for path in location:
+            try:
+                command(path)
+            except Exception as err:
+                print("Skipping ", path, " because:\n", err)
+        if errors:
+            print("There where %d errors." % errors)
+            sys.exit(-2)
+    else:
+        print(ERROR_MESSAGE)
+
+if __name__ == '__main__':
+    arguments = parser.parse_args()
+    if arguments.cmd == "install":
+        get_location(arguments.location,
+                     lambda x: setup_hook(x, get_lint_command()))
+    elif arguments.cmd == "uninstall":
+        get_location(arguments.location,
+                     remove_hook)
+    elif arguments.cmd == "lint":
+        lint(arguments)
+    else:
+        print("Uh?")
+else:
+    print("Why the hell are you importing an executable?")

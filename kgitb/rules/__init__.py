@@ -9,22 +9,22 @@ to the commit messages.
 ... We used docstrings to keep the tests as close as possible to the codes.
 ... Look! That line was exactly 72 characters long!!!
 ... Yes I know that came at the price of an extra s at code.
+... # This\tline should be ignored as it is a comment. So any violation should
 ... '''
 
 >>> bad_message = '''fixes(k g b): Make it quick and dirty, make it bads
 ... We try to make explanations as understandable as possible but we have some
 ... \tissues with code consistency.'''
 
->>> len(apply(good_message))
+>>> len(apply_rules(good_message))
 0
->>> len(apply(bad_message))
+>>> len(apply_rules(bad_message))
 5
 """
 
 import re
 from inspect import getmembers, isfunction
 from . import line_rules
-from . import raw_rules
 from . import status_rules
 
 
@@ -34,22 +34,25 @@ def _get_rules(module):
             if tup[0][0] != "_"]
 
 _line_rules = _get_rules(line_rules)
-_raw_rules = _get_rules(raw_rules)
 _status_rules = _get_rules(status_rules)
+
+
+def _is_merge(status_line):
+    return status_line.startswith("Merge pull request #")
 
 
 def split_lines(commit_message):
     return re.split('\r?\n', commit_message)
 
 
-def apply(commit_message):
+def apply_rules(commit_message):
     """Apply all rules to the commit message."""
     errors = []
-    for rule in _raw_rules:
-        err = rule(commit_message)
-        if err is not None:
-            errors.append(err)
+    if _is_merge(commit_message):
+        return errors
     commit_lines = split_lines(commit_message)
+    status = commit_lines[0]
+    commit_lines = [l for l in commit_lines if not l.startswith("#")]
     for rule in _status_rules:
         err = rule(commit_lines[0])
         if err is not None:
@@ -58,4 +61,4 @@ def apply(commit_message):
         err = check(commit_lines)
         if err is not None:
             errors.append(err)
-    return(errors)
+    return errors

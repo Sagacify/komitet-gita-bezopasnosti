@@ -236,7 +236,8 @@ def get_location(arguments):
                 ["git", "config", "--global", "core.hooksPath", GLOBAL_HOOK],
                 universal_newlines=True)
             hook_dir = GLOBAL_HOOK
-        os.makedirs(hook_dir, exist_ok=True)
+        if not os.path.exists(hook_dir):
+            os.makedirs(hook_dir)
         return [hook_dir]
 
     elif location == "local":
@@ -266,10 +267,14 @@ if __name__ == "__main__":
         try:
             for location in get_location(arguments):
                 remove_hook(get_commit_msg_hook(location))
-        except CalledProcessError as err:
+        except CalledProcessError:
             print("Could not uninstall global hook.\n",
                   "Either hooksPath is not set in your .gitconfig,\n",
                   "or git is not in python's path.")
+            sys.exit(-1)
+        except ValueError:
+            print("Could not uninstall global hook.\n",
+                  "It seems the commit-msg hook file was not present.")
             sys.exit(-1)
         except Exception as err:
             print("Couldn't uninstall because: ", err)

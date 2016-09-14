@@ -8,12 +8,23 @@ from kgitb import rules
 import stat
 import inspect
 import re
-
+from subprocess import CalledProcessError, check_output
+from distutils.version import LooseVersion
 
 ERROR_MESSAGE = """Uh? You seemt to have found a bug. Please report it at:
 https//github.com/sagacify/komitet-gita-bezopasnosti
 Thank you.
 """
+
+INSTALL = "install"
+
+GLOBAL_HOOK = os.path.join(os.getenv("HOME"), ".config", "git-global-hooks")
+
+
+def print_error():
+    """Print generic error message and exit."""
+    print(ERROR_MESSAGE)
+    sys.exit(-1)
 
 
 def location_arguments(parser):
@@ -42,7 +53,7 @@ uninstall_parser = subparsers.add_parser("uninstall", help="Remove web hooks")
 location_arguments(uninstall_parser)
 
 # install parser
-install_parser = subparsers.add_parser("install", help="Set up web hooks")
+install_parser = subparsers.add_parser(INSTALL, help="Set up web hooks")
 location_arguments(install_parser)
 
 # lint parser
@@ -55,18 +66,28 @@ what.add_argument(
 what.add_argument("-m", "--message", nargs=1, help="message to lint")
 
 
+def check_git_version():
+    """Makes sure git version is greater or equal to 2.9.0"""
+    vers = check_output(["git", "--version"], universal_newlines=True).strip()
+    return LooseVersion(vers.split(" ")[2]) >= LooseVersion("2.9.0")
+
+
 def ensure_git_dir(path):
     """Check if path leads to a git repository.
 
-    Return the path to the correct hook if it is,
+    Return the path to the hook directory if it is,
     raisess a ValueError otherwise.
     """
     if os.path.isdir(os.path.join(path, ".git")):
-        return os.path.join(path, ".git", "hooks", "commit-msg")
+        return os.path.join(path, ".git", "hooks")
     raise ValueError(u"%s is not a git directory." % path)
 
 
-def get_lint_command():
+def get_commit_msg_hook(path):
+    return os.path.join(path, "commit-msg")
+
+
+def get_lint_command(arguments):
     """Generate lint command to be added to the hook executable.
 
     Uses resident's full path to avoid issues with programse executing git
@@ -106,14 +127,13 @@ def locate_command_in_hook(hook_path):
         raise Exception("THIS_SHOULD_NEVER_HAPPEN")
 
 
-def setup_hook(repo_path, command):
+def setup_hook(hook_path, command):
     """Setup resident in the commit-msg hoook in given git repository.
 
     Overwrite the existing command if there is one already,
     append to the existing file if there is one,
     or creeate a new executable shell script if there isn't one.
     """
-    hook_path = ensure_git_dir(repo_path)
     filtered_existing = locate_command_in_hook(hook_path)
 
     if filtered_existing is False:
@@ -134,14 +154,13 @@ def setup_hook(repo_path, command):
     os.chmod(hook_path, st.st_mode | stat.S_IXUSR)
 
 
-def remove_hook(repo_path):
+def remove_hook(hook_path):
     """Remove resident from the commit-msg hoook in given git repository.
 
     Replace resident command by empty string if it is present in the hook,
     If the rest of the hook contains only whitespaces and comments,
     remove the commit-msg hook entirely.
     """
-    hook_path = ensure_git_dir(repo_path)
     filtered_existing = locate_command_in_hook(hook_path)
     if filtered_existing is False:
         raise ValueError("NOT INSTALLED")
@@ -199,42 +218,62 @@ def lint(arguments):
     print("APPROVED BY THE KGitB.")
 
 
-def get_location(location, command):
-    """Apply command in location.
-
-    Be it setting up or cleaning up,
-    this function will apply the command to all given locations
-    """
+def get_location(arguments):
+    """Get hook dir location."""
+    location = arguments.location
     if location == "global":
-        print("Sorry, this feature hasn't been implemented yet")
-        sys.exit(-1)
-    elif location == "local":
-        try:
-            command(os.getcwd())
-        except ValueError as error:
-            print(error)
+        if not check_git_version():
+            print("Git version must be greater or equal to 2.9")
             sys.exit(-1)
+        try:
+            hook_dir = check_output(
+                ["git", "config", "--global", "core.hooksPath"],
+                universal_newlines=True).strip()
+        except CalledProcessError as e:
+            if arguments.cmd != INSTALL:
+                raise e
+            check_output(
+                ["git", "config", "--global", "core.hooksPath", GLOBAL_HOOK],
+                universal_newlines=True)
+            hook_dir = GLOBAL_HOOK
+        os.makedirs(hook_dir, exist_ok=True)
+        return [hook_dir]
+
+    elif location == "local":
+        return [ensure_git_dir(os.getcwd())]
+
     elif isinstance(location, list):
-        errors = 0
-        for path in location:
+        def check_or_none(path):
             try:
-                command(path)
-            except Exception as err:
+                return ensure_git_dir(path)
+            except ValueError as err:
                 print("Skipping ", path, " because:\n", err)
-        if errors:
-            print("There where %d errors." % errors)
-            sys.exit(-2)
+                return None
+
+        return [checked for checked in (
+            check_or_none(path) for path in location) if checked]
     else:
-        print(ERROR_MESSAGE)
+        print_error()
+
 
 if __name__ == "__main__":
     arguments = parser.parse_args()
-    if arguments.cmd == "install":
-        get_location(arguments.location,
-                     lambda x: setup_hook(x, get_lint_command()))
+    if arguments.cmd == INSTALL:
+        command = get_lint_command(arguments)
+        for location in get_location(arguments):
+            setup_hook(get_commit_msg_hook(location), command)
     elif arguments.cmd == "uninstall":
-        get_location(arguments.location,
-                     remove_hook)
+        try:
+            for location in get_location(arguments):
+                remove_hook(get_commit_msg_hook(location))
+        except CalledProcessError as err:
+            print("Could not uninstall global hook.\n",
+                  "Either hooksPath is not set in your .gitconfig,\n",
+                  "or git is not in python's path.")
+            sys.exit(-1)
+        except Exception as err:
+            print("Couldn't uninstall because: ", err)
+            print_error()
     elif arguments.cmd == "lint":
         lint(arguments)
     else:

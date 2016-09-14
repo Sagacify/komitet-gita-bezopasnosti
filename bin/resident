@@ -19,30 +19,30 @@ Thank you.
 def location_arguments(parser):
     """Add location argument to an argument parser."""
     location = parser.add_mutually_exclusive_group()
-    location.set_defaults(location='local')
+    location.set_defaults(location="local")
     location.add_argument(
-        '--local', action="store_const", dest='location', const="local",
+        "--local", action="store_const", dest="location", const="local",
         help="Installs resident to the local git directory (default)")
     location.add_argument(
-        '--global', action="store_const", dest='location', const="global",
+        "--global", action="store_const", dest="location", const="global",
         help="Installs resident as a global hook")
     location.add_argument(
-        '--path', action="store", nargs='+', dest='location',
+        "--path", action="store", nargs="+", dest="location",
         help="Installs resident as a local hook in\n" +
         "the git director(y/ies) provided")
     return parser
 
 
-parser = argparse.ArgumentParser(description='Commit message linter.')
-subparsers = parser.add_subparsers(help='commands', dest="cmd")
+parser = argparse.ArgumentParser(description="Commit message linter.")
+subparsers = parser.add_subparsers(help="commands", dest="cmd")
 subparsers.required = True
 
 # uninstall parser
-uninstall_parser = subparsers.add_parser('uninstall', help='Remove web hooks')
+uninstall_parser = subparsers.add_parser("uninstall", help="Remove web hooks")
 location_arguments(uninstall_parser)
 
 # install parser
-install_parser = subparsers.add_parser('install', help='Set up web hooks')
+install_parser = subparsers.add_parser("install", help="Set up web hooks")
 location_arguments(install_parser)
 
 # lint parser
@@ -51,8 +51,8 @@ linter_parser = subparsers.add_parser(
 
 what = linter_parser.add_mutually_exclusive_group(required=True)
 what.add_argument(
-    '--file', nargs="+", help='File(s) to check.')
-what.add_argument("-m", "--message", nargs=1, help='message to lint')
+    "--file", nargs="+", help="File(s) to check.")
+what.add_argument("-m", "--message", nargs=1, help="message to lint")
 
 
 def ensure_git_dir(path):
@@ -227,7 +227,7 @@ def get_location(location, command):
     else:
         print(ERROR_MESSAGE)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     arguments = parser.parse_args()
     if arguments.cmd == "install":
         get_location(arguments.location,

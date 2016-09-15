@@ -4,7 +4,7 @@ from ..config import MAX_STATUS_LENGTH
 from ..config import TYPES
 
 STATUS_PATTERN = re.compile(
-    r"^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\w)(\s*)$")
+    r"^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\S)(\s*)$")
 
 PRETTY_TYPES = ", ".join(sorted(TYPES))
 
@@ -49,9 +49,11 @@ def check_status_formatting(status_line):
 
     >>> print(check_status_formatting("fix(this):n  "))
     Add space after colon.
-    Uppercase the first character of the subject.
     Make subject at least three character long.
     Strip trailing whitespaces from status line.
+
+    >>> check_status_formatting("fix(this): Allow final non-word character.")
+
     """
     match = STATUS_PATTERN.match(status_line)
     if match is None:
@@ -69,8 +71,6 @@ def check_status_formatting(status_line):
         errors.append("Add space after colon.")
     elif match.group(5) != " ":
         errors.append("Use a single space between colon and subject.")
-    if not match.group(6)[0].isupper():
-        errors.append("Uppercase the first character of the subject.")
     if len(match.group(6).strip()) < 3:
         errors.append("Make subject at least three character long.")
     if len(match.group(7)) > 0:

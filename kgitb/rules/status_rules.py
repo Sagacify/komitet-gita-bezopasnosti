@@ -4,7 +4,7 @@ from ..config import MAX_STATUS_LENGTH
 from ..config import TYPES
 
 STATUS_PATTERN = re.compile(
-    r"^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\w)(\s*)$")
+    r"^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\S)(\s*)$")
 
 PRETTY_TYPES = ", ".join(sorted(TYPES))
 
@@ -52,6 +52,9 @@ def check_status_formatting(status_line):
     Uppercase the first character of the subject.
     Make subject at least three character long.
     Strip trailing whitespaces from status line.
+
+    >>> check_status_formatting("fix(this): Allow final non-word character.")
+
     """
     match = STATUS_PATTERN.match(status_line)
     if match is None:

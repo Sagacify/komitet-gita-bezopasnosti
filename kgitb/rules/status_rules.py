@@ -15,10 +15,11 @@ def check_status_length(status_line):
     >>> check_status_length("this is short enough")
 
     >>> check_status_length("TOO_LONG" * 10)
-    'Limit status to 50 characters'
-    """
+    "Shorten status from {0} to {1} characters"
+    """.format(len("TOO_LONG" * 10), MAX_STATUS_LENGTH)
     if len(status_line) > MAX_STATUS_LENGTH:
-        return "Limit status to {0} characters".format(MAX_STATUS_LENGTH)
+        return "Shorten status from {0} to {1} characters".format(
+            len(status_line), MAX_STATUS_LENGTH)
 
 
 def check_status_formatting(status_line):
@@ -26,11 +27,11 @@ def check_status_formatting(status_line):
     >>> check_status_formatting("fix(this): This is good")
 
     >>> print(check_status_formatting("fixing(this): This is not good"))
-    Status must start with one of the following types:
+    Begin status with one of the following types:
     *doc, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting("testing(this): This is not good"))
-    Status must start with one of the following types:
+    Begin status with one of the following types:
     *doc, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting("fix(th)is): This is not good"))
@@ -58,7 +59,7 @@ def check_status_formatting(status_line):
                 "type and scope cannot contain spaces or parenthesis")
     errors = []
     if match.group(1) not in TYPES:
-        errors.append("Status must start with one of the following types:\n" +
+        errors.append("Begin status with one of the following types:\n" +
                       "*%s*" % PRETTY_TYPES)
     if len(match.group(2)) > 0:
         errors.append("Remove space between type and scope.")

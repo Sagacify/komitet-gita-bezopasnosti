@@ -15,7 +15,7 @@ examples
 
 
 # resident
-Resident can be installed using pip and should not require any dependencies using:
+Resident can be installed using pip using the following command. If you have a permission errors try using the --user flag with pip and add ~/.local/bin to your path. It should not require any dependencies.
 ```
 pip install kgitb
 ```
@@ -28,6 +28,18 @@ resident install --local
 To set it up in another repository or multiple repository, you can path it a path to the repositor(y/ies) that you want to install it to:
 ```
 resident install --path PATH_TO_REPO1 PATH_TO_REPO2
+```
+
+To set it up globally.
+
+WARNING 0: Only works with git 2.9.0+
+
+WARNING1: If it hasn't been set yet, this option will set the core.hooksPath value in your ```.gitconfig``` to ```$HOME/.config/git-global-hooks```. This will disable all local hooks in your repositories. If this is not what you want, you might want to have a look at hook templates.
+
+WARNING2: global means for the user, system setup hasn't been implemented (yet, PR anyone?).
+
+```
+resident install --global
 ```
 
 If the webhook is correctly set up, you should see a ```APPROVED BY THE KGitB.``` line when you commit something, or if there are errors, the commit will fail with a description of the errors.
@@ -57,8 +69,8 @@ The github token is needed to write comments, set the pr status as well as acces
 All contributions are of course welcome, please submit them as pull-requests and make sure that you are not in violation of the kgitb rules.
 If you need ideas:
 * Add rules list and documentation
-* resident, add --template and --global install
-* resident, add command line options for customizing rules
+* resident, add --template, --template--system and --system install
+* resident, add lubyanka command line options for customizing rules
 * lubyanka, add origin of connection check [cfr](https://github.com/carlos-jenkins/python-github-webhooks/blob/master/webhooks.py#L56)
 * lubyanka, add setup script
 * packaging, figure out how extra_requires works.

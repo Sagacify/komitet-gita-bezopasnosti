@@ -15,10 +15,11 @@ def check_status_length(status_line):
     >>> check_status_length("this is short enough")
 
     >>> check_status_length("TOO_LONG" * 10)
-    'Limit status to 50 characters'
-    """
+    "Shorten status from {0} to {1} characters"
+    """.format(len("TOO_LONG" * 10), MAX_STATUS_LENGTH)
     if len(status_line) > MAX_STATUS_LENGTH:
-        return "Limit status to {0} characters".format(MAX_STATUS_LENGTH)
+        return "Shorten status from {0} to {1} characters".format(
+            len(status_line), MAX_STATUS_LENGTH)
 
 
 def check_status_formatting(status_line):

@@ -27,11 +27,11 @@ def check_status_formatting(status_line):
     >>> check_status_formatting("fix(this): This is good")
 
     >>> print(check_status_formatting("fixing(this): This is not good"))
-    Status must start with one of the following types:
+    Begin status with one of the following types:
     *doc, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting("testing(this): This is not good"))
-    Status must start with one of the following types:
+    Begin status with one of the following types:
     *doc, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting("fix(th)is): This is not good"))
@@ -59,7 +59,7 @@ def check_status_formatting(status_line):
                 "type and scope cannot contain spaces or parenthesis")
     errors = []
     if match.group(1) not in TYPES:
-        errors.append("Status must start with one of the following types:\n" +
+        errors.append("Begin status with one of the following types:\n" +
                       "*%s*" % PRETTY_TYPES)
     if len(match.group(2)) > 0:
         errors.append("Remove space between type and scope.")

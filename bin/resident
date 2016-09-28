@@ -16,9 +16,9 @@ https//github.com/sagacify/komitet-gita-bezopasnosti
 Thank you.
 """
 
-INSTALL = "install"
+INSTALL = 'install'
 
-GLOBAL_HOOK = os.path.join(os.getenv("HOME"), ".config", "git-global-hooks")
+GLOBAL_HOOK = os.path.join(os.getenv('HOME'), '.config', 'git-global-hooks')
 
 
 def print_error():
@@ -30,46 +30,46 @@ def print_error():
 def location_arguments(parser):
     """Add location argument to an argument parser."""
     location = parser.add_mutually_exclusive_group()
-    location.set_defaults(location="local")
+    location.set_defaults(location='local')
     location.add_argument(
-        "--local", action="store_const", dest="location", const="local",
-        help="Installs resident to the local git directory (default)")
+        '--local', action='store_const', dest='location', const='local',
+        help='Installs resident to the local git directory (default)')
     location.add_argument(
-        "--global", action="store_const", dest="location", const="global",
-        help="Installs resident as a global hook")
+        '--global', action='store_const', dest='location', const='global',
+        help='Installs resident as a global hook')
     location.add_argument(
-        "--path", action="store", nargs="+", dest="location",
-        help="Installs resident as a local hook in\n" +
-        "the git director(y/ies) provided")
+        '--path', action='store', nargs='+', dest='location',
+        help='Installs resident as a local hook in\n' +
+        'the git director(y/ies) provided')
     return parser
 
 
-parser = argparse.ArgumentParser(description="Commit message linter.")
-subparsers = parser.add_subparsers(help="commands", dest="cmd")
+parser = argparse.ArgumentParser(description='Commit message linter.')
+subparsers = parser.add_subparsers(help='commands', dest='cmd')
 subparsers.required = True
 
 # uninstall parser
-uninstall_parser = subparsers.add_parser("uninstall", help="Remove web hooks")
+uninstall_parser = subparsers.add_parser('uninstall', help='Remove web hooks')
 location_arguments(uninstall_parser)
 
 # install parser
-install_parser = subparsers.add_parser(INSTALL, help="Set up web hooks")
+install_parser = subparsers.add_parser(INSTALL, help='Set up web hooks')
 location_arguments(install_parser)
 
 # lint parser
 linter_parser = subparsers.add_parser(
-    "lint", help="Lint commit or file containing commit")
+    'lint', help='Lint commit or file containing commit')
 
 what = linter_parser.add_mutually_exclusive_group(required=True)
 what.add_argument(
-    "--file", nargs="+", help="File(s) to check.")
-what.add_argument("-m", "--message", nargs=1, help="message to lint")
+    '--file', nargs='+', help='File(s) to check.')
+what.add_argument('-m', '--message', nargs=1, help='message to lint')
 
 
 def check_git_version():
     """Makes sure git version is greater or equal to 2.9.0"""
-    vers = check_output(["git", "--version"], universal_newlines=True).strip()
-    return LooseVersion(vers.split(" ")[2]) >= LooseVersion("2.9.0")
+    vers = check_output(['git', '--version'], universal_newlines=True).strip()
+    return LooseVersion(vers.split(' ')[2]) >= LooseVersion('2.9.0')
 
 
 def ensure_git_dir(path):
@@ -78,13 +78,13 @@ def ensure_git_dir(path):
     Return the path to the hook directory if it is,
     raisess a ValueError otherwise.
     """
-    if os.path.isdir(os.path.join(path, ".git")):
-        return os.path.join(path, ".git", "hooks")
-    raise ValueError(u"%s is not a git directory." % path)
+    if os.path.isdir(os.path.join(path, '.git')):
+        return os.path.join(path, '.git', 'hooks')
+    raise ValueError(u'%s is not a git directory.' % path)
 
 
 def get_commit_msg_hook(path):
-    return os.path.join(path, "commit-msg")
+    return os.path.join(path, 'commit-msg')
 
 
 def get_lint_command(arguments):
@@ -98,7 +98,7 @@ def get_lint_command(arguments):
         os.linesep)
 
 
-PATTERN = re.compile(r"^\s*\S*{}resident ".format(re.escape(os.path.sep)))
+PATTERN = re.compile(r'^\s*\S*{}resident '.format(re.escape(os.path.sep)))
 
 
 def locate_command_in_hook(hook_path):
@@ -121,10 +121,10 @@ def locate_command_in_hook(hook_path):
     elif len(filtered_lines) == (len(lines) - 1):
         return filtered_lines
     elif len(filtered_lines) < len(lines):
-        print("WARN: MULTIPLE MATCHES WHERE REMOVED.")
+        print('WARN: MULTIPLE MATCHES WHERE REMOVED.')
         return filtered_lines
     else:
-        raise Exception("THIS_SHOULD_NEVER_HAPPEN")
+        raise Exception('THIS_SHOULD_NEVER_HAPPEN')
 
 
 def setup_hook(hook_path, command):
@@ -138,16 +138,16 @@ def setup_hook(hook_path, command):
 
     if filtered_existing is False:
         if os.path.isfile(hook_path):
-            with io.open(hook_path, "a") as new_hook:
+            with io.open(hook_path, 'a') as new_hook:
                 new_hook.write(os.linesep + command)
         else:
-            with io.open(hook_path, "w") as hook:
-                hook.write(u"#!/usr/bin/env sh{}".format(os.linesep + command))
+            with io.open(hook_path, 'w') as hook:
+                hook.write(u'#!/usr/bin/env sh{}'.format(os.linesep + command))
     else:
         if not filtered_existing[-1].endswith(os.linesep):
             command = os.linesep + command
         filtered_existing.append(command)
-        with io.open(hook_path, "w") as new_hook:
+        with io.open(hook_path, 'w') as new_hook:
             new_hook.write("".join(filtered_existing))
 
     st = os.stat(hook_path)
@@ -163,26 +163,26 @@ def remove_hook(hook_path):
     """
     filtered_existing = locate_command_in_hook(hook_path)
     if filtered_existing is False:
-        raise ValueError("NOT INSTALLED")
+        raise ValueError('NOT INSTALLED')
 
-    if [l for l in filtered_existing if not(l.startswith("#") or
-                                            re.match("^\s*$", l))]:
+    if [l for l in filtered_existing if not(l.startswith('#') or
+                                            re.match('^\s*$', l))]:
         st = os.stat(hook_path)
-        with io.open(hook_path, "w") as new_hook:
+        with io.open(hook_path, 'w') as new_hook:
             new_hook.write("".join(filtered_existing))
         os.chmod(hook_path, st.st_mode)
     else:
         os.remove(hook_path)
 
 
-def format_errrors(errors, file="your commit message."):
+def format_errrors(errors, file='your commit message.'):
     """Pretty print kgb's comments."""
     if len(errors) == 1:
-        print("The following error was found %s" % file)
+        print('The following error was found %s' % file)
         print(errors[0])
     else:
-        print("The following errors were found %s" % file)
-        print("\n".join(errors))
+        print('The following errors were found %s' % file)
+        print('\n'.join(errors))
 
 
 def lint_files(file_paths):
@@ -208,39 +208,39 @@ def lint(arguments):
     if arguments.message:
         errors = rules.apply_rules(arguments.message[0])
         if errors:
-            format_errrors(errors, "your message.")
+            format_errrors(errors, 'your message.')
             sys.exit(18)
     elif arguments.file:
         if not lint_files(arguments.file):
             sys.exit(18)
     else:
         print(ERROR_MESSAGE)
-    print("APPROVED BY THE KGitB.")
+    print('APPROVED BY THE KGitB.')
 
 
 def get_location(arguments):
     """Get hook dir location."""
     location = arguments.location
-    if location == "global":
+    if location == 'global':
         if not check_git_version():
-            print("Git version must be greater or equal to 2.9")
+            print('Git version must be greater or equal to 2.9')
             sys.exit(-1)
         try:
             hook_dir = check_output(
-                ["git", "config", "--global", "core.hooksPath"],
+                ['git', 'config', '--global', 'core.hooksPath'],
                 universal_newlines=True).strip()
         except CalledProcessError as e:
             if arguments.cmd != INSTALL:
                 raise e
             check_output(
-                ["git", "config", "--global", "core.hooksPath", GLOBAL_HOOK],
+                ['git', 'config', '--global', 'core.hooksPath', GLOBAL_HOOK],
                 universal_newlines=True)
             hook_dir = GLOBAL_HOOK
         if not os.path.exists(hook_dir):
             os.makedirs(hook_dir)
         return [hook_dir]
 
-    elif location == "local":
+    elif location == 'local':
         return [ensure_git_dir(os.getcwd())]
 
     elif isinstance(location, list):
@@ -248,7 +248,7 @@ def get_location(arguments):
             try:
                 return ensure_git_dir(path)
             except ValueError as err:
-                print("Skipping ", path, " because:\n", err)
+                print('Skipping ', path, ' because:\n', err)
                 return None
 
         return [checked for checked in (
@@ -257,31 +257,31 @@ def get_location(arguments):
         print_error()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     arguments = parser.parse_args()
     if arguments.cmd == INSTALL:
         command = get_lint_command(arguments)
         for location in get_location(arguments):
             setup_hook(get_commit_msg_hook(location), command)
-    elif arguments.cmd == "uninstall":
+    elif arguments.cmd == 'uninstall':
         try:
             for location in get_location(arguments):
                 remove_hook(get_commit_msg_hook(location))
         except CalledProcessError:
-            print("Could not uninstall global hook.\n",
-                  "Either hooksPath is not set in your .gitconfig,\n",
-                  "or git is not in python's path.")
+            print('Could not uninstall global hook.\n',
+                  'Either hooksPath is not set in your .gitconfig,\n',
+                  'or git is not in python\'s path.')
             sys.exit(-1)
         except ValueError:
-            print("Could not uninstall global hook.\n",
-                  "It seems the commit-msg hook file was not present.")
+            print('Could not uninstall global hook.\n',
+                  'It seems the commit-msg hook file was not present.')
             sys.exit(-1)
         except Exception as err:
-            print("Couldn't uninstall because: ", err)
+            print('Could not uninstall because: ', err)
             print_error()
-    elif arguments.cmd == "lint":
+    elif arguments.cmd == 'lint':
         lint(arguments)
     else:
-        print("Uh?")
+        print('Uh?')
 else:
-    print("Why the hell are you importing an executable?")
+    print('Why the hell are you importing an executable?')

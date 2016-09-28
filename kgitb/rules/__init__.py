@@ -33,6 +33,7 @@ def _get_rules(module):
     return [tup[1] for tup in getmembers(module, isfunction)
             if tup[0][0] != '_']
 
+
 _line_rules = _get_rules(line_rules)
 _status_rules = _get_rules(status_rules)
 
@@ -54,7 +55,7 @@ def apply_rules(commit_message):
     status = commit_lines[0]
     commit_lines = [l for l in commit_lines if not l.startswith('#')]
     for rule in _status_rules:
-        err = rule(commit_lines[0])
+        err = rule(status)
         if err is not None:
             errors.append(err)
     for check in _line_rules:

@@ -28,18 +28,18 @@ from . import line_rules
 from . import status_rules
 
 
-def _get_rules(module):
+def get_rules(module):
     """Get all functions from a module."""
     return [tup[1] for tup in getmembers(module, isfunction)
             if tup[0][0] != '_']
 
 
-_line_rules = _get_rules(line_rules)
-_status_rules = _get_rules(status_rules)
+line_rules = get_rules(line_rules)
+status_rules = get_rules(status_rules)
 
 
-def _is_merge(status_line):
-    return status_line.startswith('Merge pull request #')
+def is_merge(commit_message):
+    return commit_message.startswith('Merge pull request #')
 
 
 def split_lines(commit_message):
@@ -49,16 +49,16 @@ def split_lines(commit_message):
 def apply_rules(commit_message):
     """Apply all rules to the commit message."""
     errors = []
-    if _is_merge(commit_message):
+    if is_merge(commit_message):
         return errors
     commit_lines = split_lines(commit_message)
     status = commit_lines[0]
     commit_lines = [l for l in commit_lines if not l.startswith('#')]
-    for rule in _status_rules:
+    for rule in status_rules:
         err = rule(status)
         if err is not None:
             errors.append(err)
-    for check in _line_rules:
+    for check in line_rules:
         err = check(commit_lines)
         if err is not None:
             errors.append(err)

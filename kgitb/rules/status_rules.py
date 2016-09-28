@@ -4,7 +4,7 @@ from ..config import MAX_STATUS_LENGTH
 from ..config import TYPES
 
 STATUS_PATTERN = re.compile(
-    r'^([^()\s]*)(\s*)\(([^()\s]*)\)(\s*):(\s*)(.*\S)(\s*)$')
+    r'^([^()\s]*)(\s*)(\([^()\s]*\))?(\s*):(\s*)(.*\S)(\s*)$')
 
 PRETTY_TYPES = ', '.join(sorted(TYPES))
 
@@ -25,6 +25,8 @@ def check_status_length(status_line):
 def check_status_formatting(status_line):
     r"""Check status formatting.
     >>> check_status_formatting('fix(this): This is good')
+
+    >>> check_status_formatting('fix: This is good')
 
     >>> print(check_status_formatting('fixing(this): This is not good'))
     Begin status with one of the following types:

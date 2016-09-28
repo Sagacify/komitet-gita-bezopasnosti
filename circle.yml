@@ -8,9 +8,10 @@ dependencies:
     - chmod +x run-sonar.sh
     - ./run-sonar.sh check
     - ./run-sonar.sh install
-    - pip install tox pylint
+    - pip install tox pylint flake8 flake8-quotes
 
 test:
   override:
+    - flake8 *
     - tox
     - ./run-sonar.sh run

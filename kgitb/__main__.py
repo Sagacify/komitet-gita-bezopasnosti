@@ -13,5 +13,5 @@ def main():
 
 if __name__ == '__main__':
     if GH_TOKEN is None:
-        sys.exit("GH_TOKEN must be set.")
+        sys.exit('GH_TOKEN must be set.')
     main()

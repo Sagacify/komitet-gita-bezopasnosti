@@ -42,6 +42,10 @@ def is_merge(commit_message):
     return commit_message.startswith('Merge pull request #')
 
 
+def is_revert(commit_message):
+    return commit_message.startswith("revert \"")
+
+
 def split_lines(commit_message):
     return re.split('\r?\n', commit_message)
 
@@ -49,7 +53,7 @@ def split_lines(commit_message):
 def apply_rules(commit_message):
     """Apply all rules to the commit message."""
     errors = []
-    if is_merge(commit_message):
+    if is_merge(commit_message) or is_revert(commit_message):
         return errors
     commit_lines = split_lines(commit_message)
     status = commit_lines[0]

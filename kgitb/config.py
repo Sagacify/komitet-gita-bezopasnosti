@@ -15,7 +15,6 @@ _DEFAULT_TYPES = ','.join([
     'fix',
     'perf',
     'refactor',
-    'revert',
     'style',
     'test',
     'version'])

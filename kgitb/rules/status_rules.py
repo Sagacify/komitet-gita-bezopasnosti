@@ -28,11 +28,11 @@ def check_status_formatting(status_line):
 
     >>> print(check_status_formatting('fixing(this): This is not good'))
     Begin status with one of the following types:
-    *docs, feat, fix, perf, refactor, revert, style, test, version*
+    *chore, docs, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting('testing(this): This is not good'))
     Begin status with one of the following types:
-    *docs, feat, fix, perf, refactor, revert, style, test, version*
+    *chore, docs, feat, fix, perf, refactor, revert, style, test, version*
 
     >>> print(check_status_formatting('fix(th)is): This is not good'))
     Conform status to `<type>(<scope>): <subject>` pattern

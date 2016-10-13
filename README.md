@@ -89,6 +89,7 @@ to read on GitHub as well as in various git tools.
 ### Type
 * **feat**: A new feature
 * **fix**: A bug fix
+* **chore**: Project boring stuff (like bumping a dependency version).
 * **doc**: Documentation only changes
 * **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing
   semi-colons, etc)

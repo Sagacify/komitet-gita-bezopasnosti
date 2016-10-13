@@ -95,7 +95,8 @@ to read on GitHub as well as in various git tools.
 * **refactor**: A code change that neither fixes a bug nor adds a feature
 * **perf**: A code change that improves performance
 * **test**: Adding missing tests
-* **revert**: reverting a previous commit.
+* **revert**: Reverting a previous commit.
+* **version**: To cover any version update.
 
 ### Scope
 The scope could be anything specifying place of the commit change. For example `$location`,

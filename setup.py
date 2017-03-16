@@ -2,6 +2,11 @@ from distutils.core import setup
 import io
 import os
 
+from kgitb.__about__ import (
+    __title__, __summary__, __uri__, __version__,
+    __author__, __email__
+)
+
 
 readme = 'README.md'
 if os.path.isfile('./README.rst'):
@@ -12,15 +17,15 @@ with io.open(readme, encoding='utf-8') as file:
     readme = file.read()
 
 setup(
-    name='kgitb',
+    name=__title__,
     packages=['kgitb', 'kgitb.rules'],
     scripts=['bin/resident'],
-    version='0.1.4',
-    description='A commit message linter',
+    version=__version__,
+    description=__summary__,
     long_description=readme,
-    author='Augustin Borsu',
-    author_email='dev@sagacify.com',
-    url='https://github.com/Sagacify/komitet-gita-bezopasnosti',
+    author=__author__,
+    author_email=__email__,
+    url=__uri__,
     extras_require={
         'WEB': ['flask', 'requests']
     },

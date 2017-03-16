@@ -64,3 +64,4 @@ target/
 MANIFEST
 README.rst
 
+.env

@@ -12,6 +12,6 @@ dependencies:
 
 test:
   override:
-    - flake8 *
+    - flake8 kgitb
     - tox
     - ./run-sonar.sh run

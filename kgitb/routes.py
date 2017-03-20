@@ -2,6 +2,7 @@ import logging
 import flask
 from . import github
 from . import rules
+from . import __title__, __version__
 
 log = logging.getLogger(__name__)
 
@@ -56,9 +57,18 @@ def github_pr():
     return '', 204
 
 
+def healthcheck():
+    return flask.jsonify({'name': __title__, 'version': __version__})
+
+
 def setup(app):
     app.add_url_rule('/github/pr',
                      'github_pr',
                      github_pr,
                      methods=['POST'])
+
+    app.add_url_rule('/healthcheck',
+                     'healthcheck',
+                     healthcheck,
+                     methods=['GET'])
     return app

@@ -49,7 +49,7 @@ Currently there are no options to select. They will be added at a later point.
 # lubyanka
 Lubyanka is the headquarters of all residents.
 It should be run on a server and setup with github to check all pull-requests.
-As excpected, if there are any violations, lubyanka will submit a helpful if somewhat authoritative comment message and set the status to error.
+As expected, if there are any violations, lubyanka will submit a helpful if somewhat authoritative comment message and set the status to error.
 If there are no violations it will set the status to success and congragulate you on a job well done.
 
 To run lubyanka, get a copy of the code, install the requirements and execute it with the following commands:

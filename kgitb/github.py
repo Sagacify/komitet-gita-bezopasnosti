@@ -20,12 +20,12 @@ def quote(string):
 
 
 def get_commits(url):
-    commits = requests.get(url, params={'access_token': GH_TOKEN})
+    commits = requests.get(url, headers={'Authorization': 'token %s' % GH_TOKEN})
     return commits.json()
 
 
 def get_comments(url):
-    comments = requests.get(url, params={'access_token': GH_TOKEN})
+    comments = requests.get(url, headers={'Authorization': 'token %s' % GH_TOKEN})
     result = []
     for comment in comments.json():
         if comment['body'].startswith(HIDDEN):
@@ -34,7 +34,7 @@ def get_comments(url):
 
 
 def delete_comment(comment):
-    requests.delete(comment['url'], params={'access_token': GH_TOKEN})
+    requests.delete(comment['url'], headers={'Authorization': 'token %s' % GH_TOKEN})
 
 
 def upsert_comment(url, messages):
@@ -58,19 +58,19 @@ def upsert_comment(url, messages):
 
 def update_comment(comments, body):
     requests.patch(comments['url'],
-                   params={'access_token': GH_TOKEN},
+                   headers={'Authorization': 'token %s' % GH_TOKEN},
                    json={'body': body})
 
 
 def create_comment(url, body):
     requests.post(url,
-                  params={'access_token': GH_TOKEN},
+                  headers={'Authorization': 'token %s' % GH_TOKEN},
                   json={'body': body})
 
 
 def update_status(url, state, message):
     requests.post(url,
-                  params={'access_token': GH_TOKEN},
+                  headers={'Authorization': 'token %s' % GH_TOKEN},
                   json={'state': state,
                         'context': STATUS_CONTEXT,
                         'description': message})

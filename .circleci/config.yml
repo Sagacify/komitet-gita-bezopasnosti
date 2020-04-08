@@ -1,0 +1,32 @@
+version: 2
+
+jobs:
+  sonar:
+    docker:
+      - image: sagacify/docker-circle-ci2.0:v3
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip3 install tox pylint flake8 flake8-quotes
+      - run:
+          name: flake8
+          command: flake8 kgitb
+      - run:
+          name: tox
+          command: tox
+      - run:
+          name: Run sonar tests
+          command: |
+            wget https://raw.githubusercontent.com/Sagacify/ci-tools/master/run-sonar-v2.sh
+            chmod +x ./run-sonar-v2.sh
+            bash ./run-sonar-v2.sh run
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - sonar:
+          context: DockerHub
+
+# Docker image build is done with release and dockerhub automated build

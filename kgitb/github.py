@@ -20,12 +20,16 @@ def quote(string):
 
 
 def get_commits(url):
-    commits = requests.get(url, headers={'Authorization': 'token %s' % GH_TOKEN})
+    commits = requests.get(
+        url, headers={'Authorization': 'token %s' % GH_TOKEN}
+    )
     return commits.json()
 
 
 def get_comments(url):
-    comments = requests.get(url, headers={'Authorization': 'token %s' % GH_TOKEN})
+    comments = requests.get(
+        url, headers={'Authorization': 'token %s' % GH_TOKEN}
+    )
     result = []
     for comment in comments.json():
         if comment['body'].startswith(HIDDEN):
@@ -34,7 +38,9 @@ def get_comments(url):
 
 
 def delete_comment(comment):
-    requests.delete(comment['url'], headers={'Authorization': 'token %s' % GH_TOKEN})
+    requests.delete(
+        comment['url'], headers={'Authorization': 'token %s' % GH_TOKEN}
+    )
 
 
 def upsert_comment(url, messages):

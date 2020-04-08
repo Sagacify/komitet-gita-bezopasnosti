@@ -10,7 +10,7 @@ __title__ = 'komitet-gita-bezopasnosti'
 __summary__ = 'A commit message style enforcer.'
 __uri__ = 'https://github.com/Sagacify/komitet-gita-bezopasnosti'
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 
 __author__ = 'Sagacify'
